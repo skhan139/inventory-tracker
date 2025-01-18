@@ -1,0 +1,47 @@
+/* src/components/Navbar.css */
+.navbar {
+    background-color: black; /* Set navbar background color to black */
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .navbar-logo {
+    height: 50px; /* Adjust the height as needed */
+  }
+  
+  .navbar-buttons {
+    display: flex;
+    align-items: center;
+  }
+  
+  .navbar-list {
+    list-style-type: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navbar-item {
+    margin-left: 10px; /* Add spacing between buttons */
+  }
+  
+  .navbar-link {
+    text-decoration: none;
+  }
+  
+  .navbar-button {
+    background-color: white; /* Button background color */
+    color: black; /* Button text color */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .navbar-button:hover {
+    background-color: grey; /* Button hover background color */
+    color: white; /* Button hover text color */
+  }
