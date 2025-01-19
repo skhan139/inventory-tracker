@@ -1,17 +1,18 @@
-// src/components/ProductList.js
 import React from 'react';
+import ProductItem from './ProductItem';
+import './ProductList.css';
 
-const ProductList = ({ products }) => {
+const ProductList = ({ products, onIncrease, onDecrease }) => {
   return (
-    <div>
-      <h2>Product List</h2>
-      <ul>
-        {products.map(product => (
-          <li key={product.id}>
-            {product.name} - Quantity: {product.quantity}
-          </li>
-        ))}
-      </ul>
+    <div className="product-list">
+      {products.map(product => (
+        <ProductItem 
+          key={product.id} 
+          product={product}
+          onIncrease={onIncrease}
+          onDecrease={onDecrease}
+        />
+      ))}
     </div>
   );
 };

@@ -1,18 +1,22 @@
 // src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
-import ProductsPage from './pages/ProductsPage'; // Ensure this path is correct
+import Signup from './pages/Signup';
+import { AuthProvider } from './context/AuthContext';
+import './App.css';
 
 const App = () => {
   return (
     <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/products" element={<ProductsPage />} />
-      </Routes>
+      <AuthProvider>
+        <div className="app">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/signup" element={<Signup />} />
+          </Routes>
+        </div>
+      </AuthProvider>
     </Router>
   );
 };
