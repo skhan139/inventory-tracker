@@ -16,7 +16,7 @@ const App = () => {
     <Router>
       <AuthProvider>
         <InvoicesProvider>
-          <Navbar /> {/* Add Navbar here */}
+          <Navbar /> {/* Keep Navbar here */}
           <div className="app">
             <Routes>
               <Route path="/" element={<HomePage />} />

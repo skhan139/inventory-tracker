@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ProductList from '../components/ProductList';
 import SearchBar from '../components/SearchBar';
 import ProductForm from '../components/ProductForm';
+import MovePopup from '../components/MovePopup'; // Import MovePopup
 import productsData from '../Products';
 import './ProductsPage.css';
 
@@ -14,6 +15,9 @@ const ProductsPage = () => {
   const [kmStorageVisible, setKmStorageVisible] = useState(true);
   const [keyserStorageVisible, setKeyserStorageVisible] = useState(true);
   const [gfcStorageVisible, setGfcStorageVisible] = useState(true);
+  const [movePopupVisible, setMovePopupVisible] = useState(false);
+  const [currentProductId, setCurrentProductId] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState('');
 
   useEffect(() => {
     localStorage.setItem('products', JSON.stringify(products));
@@ -46,6 +50,30 @@ const ProductsPage = () => {
     setProducts(products.filter(product => product.id !== id));
   };
 
+  const handleMoveProduct = (id, location) => {
+    setCurrentProductId(id);
+    setCurrentLocation(location);
+    setMovePopupVisible(true);
+  };
+
+  const handleMove = (id, newLocation) => {
+    setProducts(products.map(product => {
+      if (product.id === id) {
+        const quantityToMove = product.quantities[currentLocation];
+        return {
+          ...product,
+          quantities: {
+            ...product.quantities,
+            [currentLocation]: 0,
+            [newLocation]: (product.quantities[newLocation] || 0) + quantityToMove,
+          },
+        };
+      }
+      return product;
+    }));
+    setMovePopupVisible(false);
+  };
+
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -66,6 +94,7 @@ const ProductsPage = () => {
             onIncrease={(id) => handleIncrease(id, 'kmStorage')}
             onDecrease={(id) => handleDecrease(id, 'kmStorage')}
             onDelete={handleDeleteProduct}
+            onMove={(id) => handleMoveProduct(id, 'kmStorage')} // Add this line
           />
         )}
       </div>
@@ -81,6 +110,7 @@ const ProductsPage = () => {
             onIncrease={(id) => handleIncrease(id, 'keyserStorage')}
             onDecrease={(id) => handleDecrease(id, 'keyserStorage')}
             onDelete={handleDeleteProduct}
+            onMove={(id) => handleMoveProduct(id, 'keyserStorage')} // Add this line
           />
         )}
       </div>
@@ -96,9 +126,19 @@ const ProductsPage = () => {
             onIncrease={(id) => handleIncrease(id, 'gfcCumberlandStorage')}
             onDecrease={(id) => handleDecrease(id, 'gfcCumberlandStorage')}
             onDelete={handleDeleteProduct}
+            onMove={(id) => handleMoveProduct(id, 'gfcCumberlandStorage')} // Add this line
           />
         )}
       </div>
+
+      {movePopupVisible && (
+        <MovePopup
+          onClose={() => setMovePopupVisible(false)}
+          onMove={handleMove}
+          productId={currentProductId}
+          currentLocation={currentLocation}
+        />
+      )}
     </div>
   );
 };
