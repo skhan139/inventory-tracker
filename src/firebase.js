@@ -1,17 +1,19 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB5fdJcpD6wWp9Xdx64QB-Gj5QxAxXvjsM",
-  authDomain: "kminventory-b2d6e.firebaseapp.com",
-  projectId: "kminventory-b2d6e",
-  storageBucket: "kminventory-b2d6e.firebasestorage.app",
-  messagingSenderId: "871145541581",
-  appId: "1:871145541581:web:bc5e4187bd4a451845be84"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const auth = getAuth(app);
 
-export { auth };
+export { db, auth };

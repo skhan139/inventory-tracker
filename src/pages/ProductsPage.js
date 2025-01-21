@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductList from '../components/ProductList';
 import SearchBar from '../components/SearchBar';
 import ProductForm from '../components/ProductForm';
@@ -6,11 +6,18 @@ import productsData from '../Products';
 import './ProductsPage.css';
 
 const ProductsPage = () => {
-  const [products, setProducts] = useState(productsData);
+  const [products, setProducts] = useState(() => {
+    const savedProducts = localStorage.getItem('products');
+    return savedProducts ? JSON.parse(savedProducts) : productsData;
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [kmStorageVisible, setKmStorageVisible] = useState(true);
   const [keyserStorageVisible, setKeyserStorageVisible] = useState(true);
   const [gfcStorageVisible, setGfcStorageVisible] = useState(true);
+
+  useEffect(() => {
+    localStorage.setItem('products', JSON.stringify(products));
+  }, [products]);
 
   const handleIncrease = (id, location) => {
     setProducts(products.map(product =>
@@ -35,6 +42,10 @@ const ProductsPage = () => {
     }]);
   };
 
+  const handleDeleteProduct = (id) => {
+    setProducts(products.filter(product => product.id !== id));
+  };
+
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -54,6 +65,7 @@ const ProductsPage = () => {
             products={filteredProducts.map(product => ({ ...product, quantity: product.quantities.kmStorage }))}
             onIncrease={(id) => handleIncrease(id, 'kmStorage')}
             onDecrease={(id) => handleDecrease(id, 'kmStorage')}
+            onDelete={handleDeleteProduct}
           />
         )}
       </div>
@@ -68,6 +80,7 @@ const ProductsPage = () => {
             products={filteredProducts.map(product => ({ ...product, quantity: product.quantities.keyserStorage }))}
             onIncrease={(id) => handleIncrease(id, 'keyserStorage')}
             onDecrease={(id) => handleDecrease(id, 'keyserStorage')}
+            onDelete={handleDeleteProduct}
           />
         )}
       </div>
@@ -82,6 +95,7 @@ const ProductsPage = () => {
             products={filteredProducts.map(product => ({ ...product, quantity: product.quantities.gfcCumberlandStorage }))}
             onIncrease={(id) => handleIncrease(id, 'gfcCumberlandStorage')}
             onDecrease={(id) => handleDecrease(id, 'gfcCumberlandStorage')}
+            onDelete={handleDeleteProduct}
           />
         )}
       </div>

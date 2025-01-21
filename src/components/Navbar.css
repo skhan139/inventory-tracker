@@ -1,42 +1,45 @@
 /* src/components/Navbar.css */
 .navbar {
-  background-color: black; /* Set navbar background color to black */
-  padding: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.navbar-logo-title {
-  display: flex;
-  align-items: center;
+  padding: 10px 20px;
+  background-color: #000;
+  background-image: url('../assets/images/matteblackbg.jpg'); /* Adjust the path to your background image */
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .navbar-logo {
-  height: 50px; /* Adjust the height as needed */
-  margin-right: 10px; /* Add spacing between the logo and the title */
+  height: 50px;
+  width: auto;
 }
 
 .navbar-title {
-  color: white; /* Title text color */
-  font-size: 1.5em; /* Adjust the size as needed */
-  font-weight: bold; /* Bold text for the title */
+  color: white;
+  margin-left: 10px;
+}
+
+.navbar-toggle {
+  display: none;
+  background-color: #000;
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
 }
 
 .navbar-buttons {
   display: flex;
-  align-items: center;
 }
 
 .navbar-list {
-  list-style-type: none;
   display: flex;
-  margin: 0;
+  gap: 10px;
+  list-style: none;
   padding: 0;
-}
-
-.navbar-item {
-  margin-left: 10px; /* Add spacing between buttons */
+  margin: 0;
 }
 
 .navbar-link {
@@ -44,16 +47,47 @@
 }
 
 .navbar-button {
-  background-color: white; /* Button background color */
-  color: black; /* Button text color */
-  border: none;
   padding: 10px 20px;
+  background-color: #000;
+  color: white;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
 .navbar-button:hover {
-  background-color: grey; /* Button hover background color */
-  color: white; /* Button hover text color */
+  background-color: #0056b3;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .navbar-buttons {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .navbar-buttons.open {
+    display: flex;
+  }
+
+  .navbar-toggle {
+    display: block;
+  }
+
+  .navbar-list {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .navbar-item {
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbar-button {
+    width: 100%;
+    margin: 5px 0;
+  }
 }

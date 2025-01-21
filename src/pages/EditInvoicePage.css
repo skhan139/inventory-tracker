@@ -1,0 +1,83 @@
+/* src/pages/EditInvoicePage.css */
+.edit-invoice-page {
+    padding: 20px;
+  }
+  
+  .edit-invoice-page h1 {
+    margin-bottom: 20px;
+  }
+  
+  .invoice-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  .product-group {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+  }
+  
+  .quantity-controls {
+    display: flex;
+    align-items: center;
+  }
+  
+  .quantity-controls button {
+    padding: 5px 10px;
+    margin: 0 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .quantity-controls button:hover {
+    background-color: #0056b3;
+  }
+  
+  .quantity-controls span {
+    padding: 5px 10px;
+  }
+  
+  button[type="submit"],
+  button[type="button"] {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  button[type="submit"]:hover,
+  button[type="button"]:hover {
+    background-color: #218838;
+  }
+  
+  .delete-product {
+    background-color: #dc3545;
+    margin-top: 10px;
+  }
+  
+  .delete-product:hover {
+    background-color: #c82333;
+  }

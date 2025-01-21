@@ -1,16 +1,12 @@
 // src/pages/HomePage.js
 import React from 'react';
-import { Link } from 'react-router-dom';
-import LoginForm from '../components/LoginForm';
 import './HomePage.css';
 
 const HomePage = () => {
   return (
     <div className="home-page">
-      <h1>Welcome to KM Sales</h1>
-      <p>Your one-stop shop for all things saleable.</p>
-      <LoginForm />
-      <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
+      <h1>Welcome To The KM Sales Database</h1>
+      <p>Your one-stop shop for product info, storage information, and company records</p>
     </div>
   );
 };
