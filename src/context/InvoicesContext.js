@@ -1,4 +1,3 @@
-// src/context/InvoicesContext.js
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';

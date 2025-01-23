@@ -1,4 +1,3 @@
-// src/pages/HomePage.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
@@ -25,8 +24,10 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      <h1>Welcome to KM Sales</h1>
-      <p>Your one-stop shop for all things saleable.</p>
+      <div className="welcome-container">
+        <h1 className="welcome">Welcome To The K&M Sales Database</h1>
+        <p className="welcome">Sort Inventory, Create Invoices, And Browse Customer Info.</p>
+      </div>
       {!currentUser && (
         <div className="login-page">
           <h2>Login</h2>

@@ -1,7 +1,7 @@
-// src/pages/ViewInvoicesPage.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
+import generateStyledPDF from '../utils/generateStyledPDF';
 import './ViewInvoicesPage.css';
 
 const ViewInvoicesPage = () => {
@@ -38,7 +38,7 @@ const ViewInvoicesPage = () => {
   return (
     <div className="view-invoices-page">
       <h1>View Previous Invoices</h1>
-      <Link to="/" className="back-to-homepage">Back to Homepage</Link>
+      <Link to="/create-invoice" className="create-invoice">Create Invoice</Link>
       <input
         type="text"
         placeholder="Search by customer name"
@@ -59,18 +59,23 @@ const ViewInvoicesPage = () => {
               <p>Customer Location: {invoice.customerLocation}</p>
               <h3>Products:</h3>
               <ul>
-                {invoice.products && invoice.products.map((product, idx) => (
-                  <li key={idx}>
-                    <p>Product: {product.name}</p>
-                    <p>Quantity: {product.quantity}</p>
-                    <p>Serial Numbers: {product.serialNumbers}</p>
-                    <p>Unit Price: ${product.unitPrice !== undefined ? product.unitPrice.toFixed(2) : 'N/A'}</p>
-                  </li>
-                ))}
+                {invoice.products && invoice.products.map((product, idx) => {
+                  return (
+                    <li key={idx}>
+                      <p>Product: {product.name}</p>
+                      <p>Quantity: {product.quantity}</p>
+                      <p>Serial Numbers: {Array.isArray(product.serialNumbers) ? product.serialNumbers.join(', ') : 'N/A'}</p>
+                      <p>Unit Price: ${product.unitPrice !== undefined ? product.unitPrice.toFixed(2) : 'N/A'}</p>
+                    </li>
+                  );
+                })}
               </ul>
               <p>Tax: {invoice.tax}%</p>
               <p>Total Price: ${invoice.totalPrice.toFixed(2)}</p>
-              <button onClick={() => handleEdit(index)}>Edit</button>
+              <div className="invoice-actions">
+                <button onClick={() => handleEdit(index)}>Edit</button>
+                <button onClick={() => generateStyledPDF(invoice)}>Download PDF</button>
+              </div>
             </li>
           ))}
         </ul>

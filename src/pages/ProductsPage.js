@@ -12,9 +12,9 @@ const ProductsPage = () => {
     return savedProducts ? JSON.parse(savedProducts) : productsData;
   });
   const [searchTerm, setSearchTerm] = useState('');
-  const [kmStorageVisible, setKmStorageVisible] = useState(true);
-  const [keyserStorageVisible, setKeyserStorageVisible] = useState(true);
-  const [gfcStorageVisible, setGfcStorageVisible] = useState(true);
+  const [kmStorageVisible, setKmStorageVisible] = useState(false); // Set to false by default
+  const [keyserStorageVisible, setKeyserStorageVisible] = useState(false); // Set to false by default
+  const [gfcStorageVisible, setGfcStorageVisible] = useState(false); // Set to false by default
   const [movePopupVisible, setMovePopupVisible] = useState(false);
   const [currentProductId, setCurrentProductId] = useState(null);
   const [currentLocation, setCurrentLocation] = useState('');

@@ -1,9 +1,9 @@
-// src/components/Navbar.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
+import logo from '../assets/images/logo.png'; // Import the logo image
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,7 +39,9 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-logo-title">
-        <img src="/assets/images/kmlogo.png" alt="Logo" className="navbar-logo" />
+        <Link to="/">
+          <img src={logo} alt="Logo" className="navbar-logo" />
+        </Link>
         <span className="navbar-title">K And M Inventory Tracker</span>
       </div>
       <button className="navbar-toggle" onClick={toggleNavbar}>

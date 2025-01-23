@@ -11,14 +11,14 @@
     display: inline-block;
     margin-bottom: 20px;
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: #000;
     color: white;
     text-decoration: none;
     border-radius: 5px;
   }
   
   .back-to-homepage:hover {
-    background-color: #0056b3;
+    background-color: #000;
   }
   
   .invoice-form {
@@ -56,7 +56,7 @@
   .quantity-controls button {
     padding: 5px 10px;
     margin: 0 5px;
-    background-color: #007bff;
+    background-color: #000;
     color: white;
     border: none;
     border-radius: 5px;
@@ -64,7 +64,7 @@
   }
   
   .quantity-controls button:hover {
-    background-color: #0056b3;
+    background-color: #000;
   }
   
   .quantity-controls span {
@@ -74,7 +74,7 @@
   button[type="submit"],
   button[type="button"] {
     padding: 10px 20px;
-    background-color: #28a745;
+    background-color: #000;
     color: white;
     border: none;
     border-radius: 5px;
