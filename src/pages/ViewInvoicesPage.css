@@ -1,14 +1,22 @@
 .view-invoices-page {
   padding: 20px;
+  background-color: wheat;
 }
 
 .view-invoices-page h1 {
   margin-bottom: 20px;
 }
 
+/* Styles for the button container */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+/* Styles for the Create Invoice button */
 .create-invoice {
   display: inline-block;
-  margin-bottom: 20px;
   padding: 10px 20px;
   background-color: #007bff;
   color: white;
@@ -17,6 +25,21 @@
 }
 
 .create-invoice:hover {
+  background-color: #0056b3;
+}
+
+/* Styles for the Back to View Invoices button */
+.back-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.back-button:hover {
   background-color: #0056b3;
 }
 
@@ -128,4 +151,8 @@ p {
 
 .invoice-actions button:hover {
   background-color: #333;
+}
+
+.invoice {
+  color: black;
 }

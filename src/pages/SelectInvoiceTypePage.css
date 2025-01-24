@@ -1,0 +1,27 @@
+.select-invoice-type-page {
+    padding: 20px;
+    text-align: center;
+    background-color: wheat;
+    min-height: 100vh; /* Ensures the element's height is at least 100% of the viewport height */
+    box-sizing: border-box;
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .invoice-type-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .invoice-type-button:hover {
+    background-color: #0056b3;
+  }

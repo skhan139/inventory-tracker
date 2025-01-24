@@ -52,15 +52,15 @@
 }
 
 .navbar-button {
-  padding: 10px 20px; /* Decreased padding for smaller buttons */
+  padding: 5px 10px; /* Decreased padding for smaller buttons */
   background-color: #2e2e2e; /* Smoke grey color */
   color: white;
   border: 2px solid #4a4a4a; /* Smoke grey outline */
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s, border-color 0.3s;
-  font-size: 16px; /* Decreased font size for the buttons */
-  width: 150px; /* Fixed width for all buttons */
+  font-size: 14px; /* Decreased font size for the buttons */
+  width: 120px; /* Fixed width for all buttons */
   text-align: center; /* Center text inside the buttons */
 }
 

@@ -1,0 +1,86 @@
+.create-allegheny-county-invoice-page {
+  padding: 20px;
+  text-align: center;
+  background-color: wheat;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.invoice-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin: 10px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 150px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.product-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+}
+
+.totals-row {
+  border-top: 2px solid #dee2e6;
+  padding-top: 20px;
+}
+
+.delete-product {
+  background-color: #dc3545;
+  margin-top: 10px;
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-product:hover {
+  background-color: #c82333;
+}
+
+.invoice-button, .back-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.invoice-button:hover, .back-button:hover {
+  background-color: #0056b3;
+}
+
+.success-message {
+  background-color: #28a745;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 20px;
+}

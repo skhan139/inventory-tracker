@@ -1,26 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
 import generateStyledPDF from '../utils/generateStyledPDF';
 import './ViewInvoicesPage.css';
 
 const ViewInvoicesPage = () => {
-  const { invoices, deleteInvoice } = useInvoices();
+  const { invoices, deleteInvoice, alleghenyCountyInvoices } = useInvoices();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState(null);
+  const [viewingType, setViewingType] = useState(null); // null, 'standard', 'allegheny'
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("Fetched Allegheny County Invoices in Component:", alleghenyCountyInvoices); // Debug log
+  }, [alleghenyCountyInvoices]);
 
   const filteredInvoices = invoices ? invoices.filter(invoice =>
     invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase())
   ) : [];
 
-  const handleEdit = (index) => {
-    navigate(`/edit-invoice/${index}`);
+  const filteredAlleghenyCountyInvoices = alleghenyCountyInvoices ? alleghenyCountyInvoices.filter(invoice =>
+    invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+  ) : [];
+
+  const handleEdit = (id) => {
+    navigate(`/edit-invoice/${id}`);
   };
 
-  const handleDelete = (index) => {
-    setInvoiceToDelete(index);
+  const handleDelete = (id) => {
+    setInvoiceToDelete(id);
     setShowModal(true);
   };
 
@@ -37,48 +47,60 @@ const ViewInvoicesPage = () => {
 
   return (
     <div className="view-invoices-page">
-      <h1>View Previous Invoices</h1>
-      <Link to="/create-invoice" className="create-invoice">Create Invoice</Link>
-      <input
-        type="text"
-        placeholder="Search by customer name"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="search-bar"
-      />
-      {filteredInvoices.length === 0 ? (
-        <p>No invoices available.</p>
+      <h1 className='invoice'>View Previous Invoices</h1>
+      {viewingType === null ? (
+        <div className="button-container">
+          <button onClick={() => setViewingType('standard')} className="invoice-button">View Standard Invoices</button>
+          <button onClick={() => setViewingType('allegheny')} className="invoice-button">View Allegheny County Invoices</button>
+        </div>
       ) : (
-        <ul>
-          {filteredInvoices.map((invoice, index) => (
-            <li key={index} className="invoice-item">
-              <button className="delete-invoice" onClick={() => handleDelete(index)}>X</button>
-              <h2>Invoice {index + 1}</h2>
-              <p>Customer Name: {invoice.customerName}</p>
-              <p>Date: {invoice.date}</p>
-              <p>Customer Location: {invoice.customerLocation}</p>
-              <h3>Products:</h3>
-              <ul>
-                {invoice.products && invoice.products.map((product, idx) => {
-                  return (
+        <>
+          <div className="button-container">
+            <Link to="/create-invoice" className="create-invoice">Create Invoice</Link>
+            <button onClick={() => setViewingType(null)} className="back-button">Back to View Invoices</button>
+          </div>
+          <input
+            type="text"
+            placeholder="Search by customer name"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-bar"
+          />
+          {viewingType === 'standard' && filteredInvoices.length === 0 && (
+            <p>No standard invoices available.</p>
+          )}
+          {viewingType === 'allegheny' && filteredAlleghenyCountyInvoices.length === 0 && (
+            <p>No Allegheny County invoices available.</p>
+          )}
+          <ul>
+            {(viewingType === 'standard' ? filteredInvoices : filteredAlleghenyCountyInvoices).map((invoice, index) => (
+              <li key={invoice.id} className="invoice-item">
+                <button className="delete-invoice" onClick={() => handleDelete(invoice.id)}>X</button>
+                <h2 className='invoice'>Invoice {index + 1}</h2>
+                <p>Customer Name: {invoice.customerName}</p>
+                <p>Date: {invoice.date}</p>
+                <p>Customer Location: {invoice.customerLocation}</p>
+                <h3>Products:</h3>
+                <ul>
+                  {invoice.products && invoice.products.map((product, idx) => (
                     <li key={idx}>
                       <p>Product: {product.name}</p>
                       <p>Quantity: {product.quantity}</p>
                       <p>Serial Numbers: {Array.isArray(product.serialNumbers) ? product.serialNumbers.join(', ') : 'N/A'}</p>
                       <p>Unit Price: ${product.unitPrice !== undefined ? product.unitPrice.toFixed(2) : 'N/A'}</p>
                     </li>
-                  );
-                })}
-              </ul>
-              <p>Tax: {invoice.tax}%</p>
-              <p>Total Price: ${invoice.totalPrice.toFixed(2)}</p>
-              <div className="invoice-actions">
-                <button onClick={() => handleEdit(index)}>Edit</button>
-                <button onClick={() => generateStyledPDF(invoice)}>Download PDF</button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                  ))}
+                </ul>
+                <p>Tax: {invoice.tax}%</p>
+                <p>Total Price: ${invoice.totalPrice.toFixed(2)}</p>
+                <div className="invoice-actions">
+                  <button onClick={() => handleEdit(invoice.id)}>Edit</button>
+                  <button onClick={() => generateStyledPDF(invoice)}>Download PDF</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       {showModal && (

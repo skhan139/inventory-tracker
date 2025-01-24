@@ -1,0 +1,33 @@
+.suppliers-page {
+    padding: 20px;
+    text-align: center;
+    background-color: wheat;
+    min-height: 100vh; /* Ensures the element's height is at least 100% of the viewport height */
+    box-sizing: border-box;
+  }
+  
+  .supplier-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .supplier-item {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+  }
+  
+  .supplier-item h2 {
+    margin: 0 0 10px 0;
+    color: black;
+  }
+  
+  .supplier-item p {
+    margin: 5px 0;
+  }
+
+  h1 {
+    color: black;
+  }

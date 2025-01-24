@@ -5,11 +5,15 @@ import ProductsPage from './pages/ProductsPage';
 import CreateInvoicePage from './pages/CreateInvoicePage';
 import ViewInvoicesPage from './pages/ViewInvoicesPage';
 import EditInvoicePage from './pages/EditInvoicePage';
+import CustomersPage from './pages/CustomersPage';
+import SuppliersPage from './pages/SuppliersPage'; // Import SuppliersPage
+import SelectInvoiceTypePage from './pages/SelectInvoiceTypePage'; // Import SelectInvoiceTypePage
+import CreateAlleghenyCountyInvoicePage from './pages/CreateAlleghenyCountyInvoicePage'; // Import CreateAlleghenyCountyInvoicePage
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
 import { InvoicesProvider } from './context/InvoicesContext';
-import LoginPage from './pages/LoginPage'; // Import LoginPage
+import LoginPage from './pages/LoginPage';
 import './App.css';
 
 const App = () => {
@@ -18,14 +22,18 @@ const App = () => {
       <AuthProvider>
         <InvoicesProvider>
           <Navbar />
-          <div className="app">
+          <div className="app"> {/* Ensure this div uses the .app class */}
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} /> {/* Add route for LoginPage */}
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/products" element={<PrivateRoute element={ProductsPage} />} />
-              <Route path="/create-invoice" element={<PrivateRoute element={CreateInvoicePage} />} />
+              <Route path="/create-invoice" element={<PrivateRoute element={SelectInvoiceTypePage} />} /> {/* Route for SelectInvoiceTypePage */}
+              <Route path="/create-invoice/standard" element={<PrivateRoute element={CreateInvoicePage} />} /> {/* Route for CreateInvoicePage */}
+              <Route path="/create-invoice/allegheny-county" element={<PrivateRoute element={CreateAlleghenyCountyInvoicePage} />} /> {/* Route for CreateAlleghenyCountyInvoicePage */}
               <Route path="/view-invoices" element={<PrivateRoute element={ViewInvoicesPage} />} />
               <Route path="/edit-invoice/:index" element={<PrivateRoute element={EditInvoicePage} />} />
+              <Route path="/customers" element={<PrivateRoute element={CustomersPage} />} />
+              <Route path="/suppliers" element={<PrivateRoute element={SuppliersPage} />} /> {/* Add route for SuppliersPage */}
             </Routes>
           </div>
         </InvoicesProvider>

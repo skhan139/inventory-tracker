@@ -70,6 +70,16 @@ const Navbar = () => {
             </Link>
           </li>
           <li className="navbar-item">
+            <Link to="/customers" className="navbar-link" onClick={handleProtectedLinkClick}>
+              <button className="navbar-button">Customers</button>
+            </Link>
+          </li>
+          <li className="navbar-item">
+            <Link to="/suppliers" className="navbar-link" onClick={handleProtectedLinkClick}>
+              <button className="navbar-button">Suppliers</button>
+            </Link>
+          </li>
+          <li className="navbar-item">
             <button className="navbar-button" onClick={handleSignOut}>Sign Out</button>
           </li>
         </ul>
