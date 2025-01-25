@@ -2,7 +2,7 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import logo from '../assets/images/logo.png'; // Import the logo
 
-const generateStyledPDF = (invoice) => {
+const generateStandardPDF = (invoice) => {
   const doc = new jsPDF();
 
   // Create an Image object
@@ -57,7 +57,7 @@ const generateStyledPDF = (invoice) => {
     ]);
     rows.push([
       { content: 'Total Price', colSpan: 3, styles: { halign: 'right' } },
-      `$${invoice.totalPrice.toFixed(2)}`
+      invoice.totalPrice !== undefined ? `$${invoice.totalPrice.toFixed(2)}` : 'N/A'
     ]);
 
     // Use jsPDF-AutoTable to add a table
@@ -79,6 +79,69 @@ const generateStyledPDF = (invoice) => {
     // Save the PDF
     doc.save(`invoice_${invoice.customerName}_${invoice.date}.pdf`);
   };
+
+  // Handle image loading error
+  img.onerror = () => {
+    console.error('Error loading logo image');
+    // Proceed without the logo
+    generatePDFWithoutLogo(doc, invoice);
+  };
 };
 
-export default generateStyledPDF;
+const generatePDFWithoutLogo = (doc, invoice) => {
+  // Add the business address and phone number in the top right corner
+  doc.setFontSize(10);
+  doc.text('365 Sunset Place', 200, 10, null, null, 'right');
+  doc.text('Keyser, WV 26726', 200, 15, null, null, 'right');
+  doc.text('(304) 788 5310', 200, 20, null, null, 'right');
+
+  // Add a title below the logo
+  doc.setFontSize(18);
+  doc.text('Invoice', 105, 25, null, null, 'center'); // Adjusted position to align with the logo
+
+  // Add customer details
+  doc.setFontSize(12);
+  doc.text(`Customer Name: ${invoice.customerName}`, 10, 40);
+  doc.text(`Date: ${invoice.date}`, 10, 50);
+  doc.text(`Customer Location: ${invoice.customerLocation}`, 10, 60);
+
+  // Define table columns
+  const columns = ["Product", "Quantity", "Serial Numbers", "Unit Price"];
+  const rows = invoice.products.map(product => [
+    product.name,
+    product.quantity,
+    Array.isArray(product.serialNumbers) ? product.serialNumbers.join(', ') : 'N/A',
+    product.unitPrice !== undefined ? `$${product.unitPrice.toFixed(2)}` : 'N/A'
+  ]);
+
+  // Add tax and total price as additional rows
+  rows.push([
+    { content: 'Tax', colSpan: 3, styles: { halign: 'right' } },
+    `${invoice.tax}%`
+  ]);
+  rows.push([
+    { content: 'Total Price', colSpan: 3, styles: { halign: 'right' } },
+    invoice.totalPrice !== undefined ? `$${invoice.totalPrice.toFixed(2)}` : 'N/A'
+  ]);
+
+  // Use jsPDF-AutoTable to add a table
+  doc.autoTable({
+    startY: 70,
+    head: [columns],
+    body: rows,
+    theme: 'grid',
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [22, 160, 133] }
+  });
+
+  // Add footer notes
+  const finalY = doc.autoTable.previous.finalY + 10; // Get the Y position after the table
+  doc.setFontSize(10);
+  doc.text('All claims and returned goods must be accompanied by this bill.', 105, finalY, null, null, 'center');
+  doc.text('Thank you', 105, finalY + 10, null, null, 'center');
+
+  // Save the PDF
+  doc.save(`invoice_${invoice.customerName}_${invoice.date}.pdf`);
+};
+
+export default generateStandardPDF;

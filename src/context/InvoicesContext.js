@@ -39,23 +39,18 @@ export const InvoicesProvider = ({ children }) => {
     fetchAlleghenyCountyInvoices();
   }, []);
 
-  const addInvoice = async (invoice) => {
+  const addInvoice = async (invoice, isAlleghenyCounty = false) => {
     try {
-      const docRef = await addDoc(collection(db, "invoices"), invoice);
-      setInvoices([...invoices, { id: docRef.id, ...invoice }]);
-      console.log("Invoice added to Firestore:", invoice);
+      const collectionName = isAlleghenyCounty ? "alleghenyCountyInvoices" : "invoices";
+      const docRef = await addDoc(collection(db, collectionName), invoice);
+      if (isAlleghenyCounty) {
+        setAlleghenyCountyInvoices([...alleghenyCountyInvoices, { id: docRef.id, ...invoice }]);
+      } else {
+        setInvoices([...invoices, { id: docRef.id, ...invoice }]);
+      }
+      console.log(`${isAlleghenyCounty ? "Allegheny County Invoice" : "Invoice"} added to Firestore:`, invoice);
     } catch (error) {
-      console.error("Error adding invoice:", error);
-    }
-  };
-
-  const addAlleghenyCountyInvoice = async (invoice) => {
-    try {
-      const docRef = await addDoc(collection(db, "alleghenyCountyInvoices"), invoice);
-      setAlleghenyCountyInvoices([...alleghenyCountyInvoices, { id: docRef.id, ...invoice }]);
-      console.log("Allegheny County Invoice added to Firestore:", invoice);
-    } catch (error) {
-      console.error("Error adding Allegheny County invoice:", error);
+      console.error(`Error adding ${isAlleghenyCounty ? "Allegheny County invoice" : "invoice"}:`, error);
     }
   };
 
@@ -64,6 +59,7 @@ export const InvoicesProvider = ({ children }) => {
       const invoiceRef = doc(db, "invoices", id);
       await updateDoc(invoiceRef, updatedInvoice);
       setInvoices(invoices.map(invoice => (invoice.id === id ? { id, ...updatedInvoice } : invoice)));
+      console.log(`Invoice with ID ${id} updated:`, updatedInvoice);
     } catch (error) {
       console.error("Error updating invoice:", error);
     }
@@ -73,13 +69,14 @@ export const InvoicesProvider = ({ children }) => {
     try {
       await deleteDoc(doc(db, "invoices", id));
       setInvoices(invoices.filter(invoice => invoice.id !== id));
+      console.log(`Invoice with ID ${id} deleted.`);
     } catch (error) {
       console.error("Error deleting invoice:", error);
     }
   };
 
   return (
-    <InvoicesContext.Provider value={{ invoices, addInvoice, updateInvoice, deleteInvoice, alleghenyCountyInvoices, addAlleghenyCountyInvoice }}>
+    <InvoicesContext.Provider value={{ invoices, addInvoice, updateInvoice, deleteInvoice, alleghenyCountyInvoices }}>
       {children}
     </InvoicesContext.Provider>
   );

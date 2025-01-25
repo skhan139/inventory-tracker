@@ -1,5 +1,6 @@
+// src/pages/CreateInvoicePage.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
 import './CreateInvoicePage.css';
 
@@ -53,7 +54,10 @@ const CreateInvoicePage = () => {
       customerName,
       date,
       customerLocation,
-      products: products || [], // Ensure products is defined
+      products: products.map(product => ({
+        ...product,
+        unitPrice: product.unitPrice || 0 // Ensure unitPrice is defined
+      })),
       tax,
       totalPrice,
     };
@@ -160,9 +164,6 @@ const CreateInvoicePage = () => {
         </div>
         <button type="submit">Create Invoice</button>
       </form>
-      <Link to="/create-invoice">
-        <button className="back-button">Back to Create Invoice</button>
-      </Link>
     </div>
   );
 };

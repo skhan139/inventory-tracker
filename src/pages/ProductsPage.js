@@ -46,8 +46,19 @@ const ProductsPage = () => {
     }]);
   };
 
-  const handleDeleteProduct = (id) => {
-    setProducts(products.filter(product => product.id !== id));
+  const handleDeleteProduct = (id, location) => {
+    setProducts(products.map(product => {
+      if (product.id === id) {
+        return {
+          ...product,
+          quantities: {
+            ...product.quantities,
+            [location]: 0, // Set the quantity for the specific location to 0
+          },
+        };
+      }
+      return product;
+    }));
   };
 
   const handleMoveProduct = (id, location) => {
@@ -93,8 +104,9 @@ const ProductsPage = () => {
             products={filteredProducts.map(product => ({ ...product, quantity: product.quantities.kmStorage }))}
             onIncrease={(id) => handleIncrease(id, 'kmStorage')}
             onDecrease={(id) => handleDecrease(id, 'kmStorage')}
-            onDelete={handleDeleteProduct}
-            onMove={(id) => handleMoveProduct(id, 'kmStorage')} // Add this line
+            onDelete={(id) => handleDeleteProduct(id, 'kmStorage')} // Pass the location
+            onMove={(id) => handleMoveProduct(id, 'kmStorage')}
+            location="kmStorage"
           />
         )}
       </div>
@@ -109,8 +121,9 @@ const ProductsPage = () => {
             products={filteredProducts.map(product => ({ ...product, quantity: product.quantities.keyserStorage }))}
             onIncrease={(id) => handleIncrease(id, 'keyserStorage')}
             onDecrease={(id) => handleDecrease(id, 'keyserStorage')}
-            onDelete={handleDeleteProduct}
-            onMove={(id) => handleMoveProduct(id, 'keyserStorage')} // Add this line
+            onDelete={(id) => handleDeleteProduct(id, 'keyserStorage')} // Pass the location
+            onMove={(id) => handleMoveProduct(id, 'keyserStorage')}
+            location="keyserStorage"
           />
         )}
       </div>
@@ -125,8 +138,9 @@ const ProductsPage = () => {
             products={filteredProducts.map(product => ({ ...product, quantity: product.quantities.gfcCumberlandStorage }))}
             onIncrease={(id) => handleIncrease(id, 'gfcCumberlandStorage')}
             onDecrease={(id) => handleDecrease(id, 'gfcCumberlandStorage')}
-            onDelete={handleDeleteProduct}
-            onMove={(id) => handleMoveProduct(id, 'gfcCumberlandStorage')} // Add this line
+            onDelete={(id) => handleDeleteProduct(id, 'gfcCumberlandStorage')} // Pass the location
+            onMove={(id) => handleMoveProduct(id, 'gfcCumberlandStorage')}
+            location="gfcCumberlandStorage"
           />
         )}
       </div>

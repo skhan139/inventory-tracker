@@ -56,7 +56,7 @@ const Navbar = () => {
           </li>
           <li className="navbar-item">
             <Link to="/products" className="navbar-link" onClick={handleProtectedLinkClick}>
-              <button className="navbar-button">Products</button>
+              <button className="navbar-button">Inventory</button>
             </Link>
           </li>
           <li className="navbar-item">

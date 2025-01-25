@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
-import generateStyledPDF from '../utils/generateStyledPDF';
+import generateStandardPDF from '../utils/generateStandardPDF';
+import generateAlleghenyPDF from '../utils/generateAlleghenyPDF';
 import './ViewInvoicesPage.css';
 
 const ViewInvoicesPage = () => {
@@ -17,13 +18,13 @@ const ViewInvoicesPage = () => {
     console.log("Fetched Allegheny County Invoices in Component:", alleghenyCountyInvoices); // Debug log
   }, [alleghenyCountyInvoices]);
 
-  const filteredInvoices = invoices ? invoices.filter(invoice =>
+  const filteredInvoices = invoices.filter(invoice =>
     invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  );
 
-  const filteredAlleghenyCountyInvoices = alleghenyCountyInvoices ? alleghenyCountyInvoices.filter(invoice =>
+  const filteredAlleghenyCountyInvoices = alleghenyCountyInvoices.filter(invoice =>
     invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  );
 
   const handleEdit = (id) => {
     navigate(`/edit-invoice/${id}`);
@@ -43,6 +44,14 @@ const ViewInvoicesPage = () => {
   const cancelDelete = () => {
     setShowModal(false);
     setInvoiceToDelete(null);
+  };
+
+  const handleDownloadPDF = (invoice) => {
+    if (viewingType === 'standard') {
+      generateStandardPDF(invoice);
+    } else if (viewingType === 'allegheny') {
+      generateAlleghenyPDF(invoice);
+    }
   };
 
   return (
@@ -92,10 +101,10 @@ const ViewInvoicesPage = () => {
                   ))}
                 </ul>
                 <p>Tax: {invoice.tax}%</p>
-                <p>Total Price: ${invoice.totalPrice.toFixed(2)}</p>
+                <p>Total Price: ${invoice.totalPrice !== undefined ? invoice.totalPrice.toFixed(2) : 'N/A'}</p>
                 <div className="invoice-actions">
                   <button onClick={() => handleEdit(invoice.id)}>Edit</button>
-                  <button onClick={() => generateStyledPDF(invoice)}>Download PDF</button>
+                  <button onClick={() => handleDownloadPDF(invoice)}>Download PDF</button>
                 </div>
               </li>
             ))}
