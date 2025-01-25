@@ -3,12 +3,15 @@ import { useInvoices } from '../context/InvoicesContext';
 import './CustomersPage.css';
 
 const CustomersPage = () => {
-  const { invoices } = useInvoices();
+  const { invoices, alleghenyCountyInvoices } = useInvoices();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
-  // Get unique customer names
-  const uniqueCustomers = Array.from(new Set(invoices.map(invoice => invoice.customerName)));
+  // Combine standard and Allegheny County invoices
+  const allInvoices = [...invoices, ...alleghenyCountyInvoices];
+
+  // Get unique customer names from combined invoices
+  const uniqueCustomers = Array.from(new Set(allInvoices.map(invoice => invoice.customerName)));
 
   // Filter customers based on search term
   const filteredCustomers = uniqueCustomers.filter(customer =>
@@ -22,7 +25,7 @@ const CustomersPage = () => {
 
   // Get invoices for the selected customer
   const customerInvoices = selectedCustomer
-    ? invoices.filter(invoice => invoice.customerName === selectedCustomer)
+    ? allInvoices.filter(invoice => invoice.customerName === selectedCustomer)
     : [];
 
   return (
@@ -60,7 +63,7 @@ const CustomersPage = () => {
                       ))}
                     </ul>
                     <p><strong>Tax:</strong> {invoice.tax}%</p>
-                    <p><strong>Total Price:</strong> ${invoice.totalPrice.toFixed(2)}</p>
+                    <p><strong>Total Price:</strong> ${invoice.totalPrice !== undefined ? invoice.totalPrice.toFixed(2) : 'N/A'}</p>
                   </li>
                 ))}
               </ul>

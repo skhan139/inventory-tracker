@@ -32,6 +32,11 @@
 
 .inventory-section h2 {
   margin-bottom: 10px;
+  color: white; /* Set text color to black */
+  background-color: black; /* Add background color */
+  padding: 10px; /* Add padding */
+  border-radius: 5px; /* Add border radius */
+  text-align: center; /* Center align text */
 }
 
 .inventory-section button {
@@ -80,4 +85,27 @@
 
 .product-item button:hover {
   background-color: #c82333;
+}
+
+/* Page styles */
+.products-page {
+  background-color: wheat;
+  padding: 20px;
+}
+
+/* Show form button styles */
+.show-form-button {
+  padding: 10px 20px; /* Decrease padding for a smaller button */
+  font-size: 14px; /* Decrease font size */
+  background-color: #000; /* Button background color set to black */
+  color: white; /* Button text color */
+  border: none; /* Remove border */
+  border-radius: 5px; /* Add border radius */
+  cursor: pointer; /* Change cursor to pointer */
+  margin: 20px auto; /* Add margin at the top and center horizontally */
+  display: block; /* Make the button a block element to center it */
+}
+
+.show-form-button:hover {
+  background-color: #0056b3; /* Change background color on hover */
 }

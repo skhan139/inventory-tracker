@@ -1,7 +1,7 @@
 import React from 'react';
 import './ProductList.css';
 
-const ProductList = ({ products, onIncrease, onDecrease, onDelete, onMove, location }) => {
+const ProductList = ({ products, onIncrease, onDecrease, onDelete, onMove }) => {
   return (
     <div className="product-list">
       {products.map(product => (
@@ -10,7 +10,7 @@ const ProductList = ({ products, onIncrease, onDecrease, onDelete, onMove, locat
           <span>{product.quantity}</span>
           <button onClick={() => onIncrease(product.id)}>+</button>
           <button onClick={() => onDecrease(product.id)}>-</button>
-          <button onClick={() => onDelete(product.id, location)}>Delete</button> {/* Pass location */}
+          <button onClick={() => onDelete(product.id)}>Delete</button>
           <button onClick={() => onMove(product.id)}>Move</button>
         </div>
       ))}

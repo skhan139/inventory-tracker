@@ -24,3 +24,7 @@
   .product-form button:hover {
     background-color: grey;
   }
+
+  .submit {
+    color: black
+  }

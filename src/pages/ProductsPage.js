@@ -18,6 +18,7 @@ const ProductsPage = () => {
   const [movePopupVisible, setMovePopupVisible] = useState(false);
   const [currentProductId, setCurrentProductId] = useState(null);
   const [currentLocation, setCurrentLocation] = useState('');
+  const [isProductFormVisible, setIsProductFormVisible] = useState(false); // State to control product form visibility
 
   useEffect(() => {
     localStorage.setItem('products', JSON.stringify(products));
@@ -91,7 +92,10 @@ const ProductsPage = () => {
 
   return (
     <div className="products-page">
-      <ProductForm addProduct={handleAddProduct} />
+      <button className="show-form-button" onClick={() => setIsProductFormVisible(!isProductFormVisible)}>
+        {isProductFormVisible ? 'Hide' : 'Show'} Add Product Form
+      </button>
+      {isProductFormVisible && <ProductForm addProduct={handleAddProduct} />}
       <SearchBar value={searchTerm} onChange={setSearchTerm} />
 
       <div className="inventory-section">

@@ -1,3 +1,4 @@
+// src/pages/EditInvoicePage.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
@@ -86,7 +87,7 @@ const EditInvoicePage = () => {
     setProducts(newProducts);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const updatedInvoice = {
       customerName,
@@ -96,8 +97,7 @@ const EditInvoicePage = () => {
       tax,
       totalPrice,
     };
-    console.log("Updating invoice with data:", updatedInvoice); // Add logging to debug
-    updateInvoice(invoices[index].id, updatedInvoice);
+    await updateInvoice(invoices[index].id, updatedInvoice);
     navigate('/view-invoices');
   };
 

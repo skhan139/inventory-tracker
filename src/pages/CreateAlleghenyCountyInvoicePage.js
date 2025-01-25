@@ -29,7 +29,8 @@ const CreateAlleghenyCountyInvoicePage = () => {
 
   useEffect(() => {
     const subTotal = formData.products.reduce((acc, product) => acc + product.quantity * product.productPrice, 0);
-    const total = subTotal + (subTotal * (isNaN(formData.salesTax) ? 0 : formData.salesTax) / 100);
+    const salesTax = isNaN(parseFloat(formData.salesTax)) ? 0 : parseFloat(formData.salesTax);
+    const total = subTotal + (subTotal * salesTax / 100);
     setFormData(prevData => ({ ...prevData, subTotal, total }));
 
     const grossProfitTotal = formData.products.reduce((acc, product) => acc + product.grossProfit * product.quantity, 0);
@@ -87,8 +88,8 @@ const CreateAlleghenyCountyInvoicePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Add the invoice to the alleghenyCountyInvoices collection
-      await addDoc(collection(db, 'alleghenyCountyInvoices'), formData);
+      // Add the invoice to the alleghenyInvoices collection
+      await addDoc(collection(db, 'alleghenyInvoices'), formData);
       console.log('Invoice added to Firestore:', formData);
 
       // Show success message
@@ -125,7 +126,7 @@ const CreateAlleghenyCountyInvoicePage = () => {
 
   return (
     <div className="create-allegheny-county-invoice-page">
-      <h1>Create Allegheny County Invoice</h1>
+      <h1>Create Allegheny Invoice</h1>
       <form onSubmit={handleSubmit} className="invoice-form">
         {showSuccessMessage && <div className="success-message">Invoice created successfully</div>}
         <div className="form-row">
@@ -216,7 +217,7 @@ const CreateAlleghenyCountyInvoicePage = () => {
                 type="number"
                 id={`grossProfit-${index}`}
                 name="grossProfit"
-                value={product.grossProfit}
+                value={isNaN(product.grossProfit) ? '' : product.grossProfit}
                 onChange={(e) => handleProductChange(index, 'grossProfit', parseFloat(e.target.value))}
                 required
               />
@@ -227,7 +228,7 @@ const CreateAlleghenyCountyInvoicePage = () => {
                 type="number"
                 id={`productPrice-${index}`}
                 name="productPrice"
-                value={product.productPrice}
+                value={isNaN(product.productPrice) ? '' : product.productPrice}
                 onChange={(e) => handleProductChange(index, 'productPrice', parseFloat(e.target.value))}
                 required
               />
@@ -238,7 +239,7 @@ const CreateAlleghenyCountyInvoicePage = () => {
                 type="number"
                 id={`taxableProfit-${index}`}
                 name="taxableProfit"
-                value={product.taxableProfit}
+                value={isNaN(product.taxableProfit) ? '' : product.taxableProfit}
                 onChange={(e) => handleProductChange(index, 'taxableProfit', parseFloat(e.target.value))}
                 required
               />
@@ -268,7 +269,7 @@ const CreateAlleghenyCountyInvoicePage = () => {
               type="number"
               id="salesTax"
               name="salesTax"
-              value={formData.salesTax}
+              value={isNaN(formData.salesTax) ? '' : formData.salesTax}
               onChange={handleChange}
               required
             />

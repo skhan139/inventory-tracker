@@ -26,7 +26,7 @@ export const InvoicesProvider = ({ children }) => {
 
     const fetchAlleghenyCountyInvoices = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "alleghenyCountyInvoices"));
+        const querySnapshot = await getDocs(collection(db, "alleghenyInvoices"));
         const invoicesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         console.log("Fetched Allegheny County Invoices:", invoicesData); // Debug log
         setAlleghenyCountyInvoices(invoicesData);
@@ -39,39 +39,51 @@ export const InvoicesProvider = ({ children }) => {
     fetchAlleghenyCountyInvoices();
   }, []);
 
-  const addInvoice = async (invoice, isAlleghenyCounty = false) => {
+  const addInvoice = async (invoice, isAllegheny = false) => {
     try {
-      const collectionName = isAlleghenyCounty ? "alleghenyCountyInvoices" : "invoices";
+      const collectionName = isAllegheny ? "alleghenyInvoices" : "invoices";
       const docRef = await addDoc(collection(db, collectionName), invoice);
-      if (isAlleghenyCounty) {
+      if (isAllegheny) {
         setAlleghenyCountyInvoices([...alleghenyCountyInvoices, { id: docRef.id, ...invoice }]);
       } else {
         setInvoices([...invoices, { id: docRef.id, ...invoice }]);
       }
-      console.log(`${isAlleghenyCounty ? "Allegheny County Invoice" : "Invoice"} added to Firestore:`, invoice);
+      console.log(`${isAllegheny ? "Allegheny Invoice" : "Invoice"} added to Firestore:`, invoice);
     } catch (error) {
-      console.error(`Error adding ${isAlleghenyCounty ? "Allegheny County invoice" : "invoice"}:`, error);
+      console.error(`Error adding ${isAllegheny ? "Allegheny invoice" : "invoice"}:`, error);
     }
   };
 
-  const updateInvoice = async (id, updatedInvoice) => {
+  const updateInvoice = async (id, updatedInvoice, isAllegheny = false) => {
     try {
-      const invoiceRef = doc(db, "invoices", id);
+      const collectionName = isAllegheny ? "alleghenyInvoices" : "invoices";
+      const invoiceRef = doc(db, collectionName, id);
       await updateDoc(invoiceRef, updatedInvoice);
-      setInvoices(invoices.map(invoice => (invoice.id === id ? { id, ...updatedInvoice } : invoice)));
-      console.log(`Invoice with ID ${id} updated:`, updatedInvoice);
+      if (isAllegheny) {
+        setAlleghenyCountyInvoices(alleghenyCountyInvoices.map(invoice => (invoice.id === id ? { id, ...updatedInvoice } : invoice)));
+      } else {
+        setInvoices(invoices.map(invoice => (invoice.id === id ? { id, ...updatedInvoice } : invoice)));
+      }
+      console.log(`${isAllegheny ? "Allegheny Invoice" : "Invoice"} with ID ${id} updated:`, updatedInvoice);
     } catch (error) {
-      console.error("Error updating invoice:", error);
+      console.error(`Error updating ${isAllegheny ? "Allegheny invoice" : "invoice"}:`, error);
     }
   };
 
-  const deleteInvoice = async (id) => {
+  const deleteInvoice = async (id, isAllegheny = false) => {
     try {
-      await deleteDoc(doc(db, "invoices", id));
-      setInvoices(invoices.filter(invoice => invoice.id !== id));
-      console.log(`Invoice with ID ${id} deleted.`);
+      const collectionName = isAllegheny ? "alleghenyInvoices" : "invoices";
+      // Debug log to check the ID and collection name
+      console.log(`Attempting to delete ${isAllegheny ? "Allegheny invoice" : "invoice"} with ID: ${id} from collection: ${collectionName}`);
+      await deleteDoc(doc(db, collectionName, id));
+      if (isAllegheny) {
+        setAlleghenyCountyInvoices(alleghenyCountyInvoices.filter(invoice => invoice.id !== id));
+      } else {
+        setInvoices(invoices.filter(invoice => invoice.id !== id));
+      }
+      console.log(`${isAllegheny ? "Allegheny Invoice" : "Invoice"} with ID ${id} deleted.`);
     } catch (error) {
-      console.error("Error deleting invoice:", error);
+      console.error(`Error deleting ${isAllegheny ? "Allegheny invoice" : "invoice"}:`, error);
     }
   };
 

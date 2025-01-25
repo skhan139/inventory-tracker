@@ -18,14 +18,6 @@ const ViewInvoicesPage = () => {
     console.log("Fetched Allegheny County Invoices in Component:", alleghenyCountyInvoices); // Debug log
   }, [alleghenyCountyInvoices]);
 
-  const filteredInvoices = invoices.filter(invoice =>
-    invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredAlleghenyCountyInvoices = alleghenyCountyInvoices.filter(invoice =>
-    invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const handleEdit = (id) => {
     navigate(`/edit-invoice/${id}`);
   };
@@ -53,6 +45,14 @@ const ViewInvoicesPage = () => {
       generateAlleghenyPDF(invoice);
     }
   };
+
+  const filteredInvoices = invoices?.filter(invoice =>
+    invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  const filteredAlleghenyCountyInvoices = alleghenyCountyInvoices?.filter(invoice =>
+    invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
 
   return (
     <div className="view-invoices-page">
