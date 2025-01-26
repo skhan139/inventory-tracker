@@ -1,7 +1,7 @@
 .create-allegheny-county-invoice-page {
   padding: 20px;
   text-align: center;
-  background-color: wheat;
+  background-image: url(/src/assets/images/eggshellbg.jpg);
   min-height: 100vh;
   box-sizing: border-box;
 }
@@ -64,7 +64,7 @@
 }
 
 .invoice-button, .back-button {
-  margin-top: 20px;
+  margin-top: 50px;
   padding: 10px 20px;
   background-color: #007bff;
   color: white;

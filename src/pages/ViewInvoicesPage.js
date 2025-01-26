@@ -1,3 +1,4 @@
+// src/pages/ViewInvoicesPage.js
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
@@ -64,9 +65,9 @@ const ViewInvoicesPage = () => {
         </div>
       ) : (
         <>
-          <div className="button-container">
-            <Link to="/create-invoice" className="create-invoice">Create Invoice</Link>
-            <button onClick={() => setViewingType(null)} className="back-button">Back to View Invoices</button>
+          <Link to="/create-invoice" className="back-button">Back to Select Invoice Type</Link>
+          <div className="create-button-container">
+            <Link to="/create-invoice" className="create-button">Create Invoice</Link>
           </div>
           <input
             type="text"

@@ -32,7 +32,7 @@ const App = () => {
               <Route path="/create-invoice/standard" element={<PrivateRoute element={CreateInvoicePage} />} /> {/* Route for CreateInvoicePage */}
               <Route path="/create-invoice/allegheny-county" element={<PrivateRoute element={CreateAlleghenyCountyInvoicePage} />} /> {/* Route for CreateAlleghenyCountyInvoicePage */}
               <Route path="/view-invoices" element={<PrivateRoute element={ViewInvoicesPage} />} />
-              <Route path="/edit-invoice/:index" element={<PrivateRoute element={EditInvoicePage} />} />
+              <Route path="/edit-invoice/:id" element={<PrivateRoute element={EditInvoicePage} />} /> {/* Ensure this route is correct */}
               <Route path="/customers" element={<PrivateRoute element={CustomersPage} />} />
               <Route path="/suppliers" element={<PrivateRoute element={SuppliersPage} />} /> {/* Add route for SuppliersPage */}
             </Routes>

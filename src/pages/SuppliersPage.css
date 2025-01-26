@@ -1,7 +1,7 @@
 .suppliers-page {
     padding: 20px;
     text-align: center;
-    background-color: wheat;
+    background-image: url(/src/assets/images/eggshellbg.jpg);
     min-height: 100vh; /* Ensures the element's height is at least 100% of the viewport height */
     box-sizing: border-box;
   }

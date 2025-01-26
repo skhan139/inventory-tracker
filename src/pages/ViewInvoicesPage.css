@@ -1,45 +1,61 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
 .view-invoices-page {
   padding: 20px;
-  background-color: wheat;
-}
-
-.view-invoices-page h1 {
-  margin-bottom: 20px;
-}
-
-/* Styles for the button container */
-.button-container {
+  background-image: url(/src/assets/images/eggshellbg.jpg);
+  background-size: cover; /* Ensures the background image covers the entire element */
+  background-repeat: no-repeat; /* Prevents the background image from repeating */
+  background-position: center; /* Centers the background image */
+  min-height: 100vh; /* Ensures the element's height is at least 100% of the viewport height */
+  height: 100%; /* Ensures the element's height is 100% of the viewport height */
+  position: relative; /* To position the back button absolutely */
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  flex-direction: column;
+  align-items: center; /* Centers the content horizontally */
 }
 
-/* Styles for the Create Invoice button */
-.create-invoice {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
+.view-invoices-page h1.invoice {
+  margin-bottom: 10px; /* Adjust this value to match the distance on SelectInvoiceTypePage */
+  text-align: center; /* Center the heading text */
 }
 
-.create-invoice:hover {
-  background-color: #0056b3;
-}
-
-/* Styles for the Back to View Invoices button */
+/* Styles for the back button */
 .back-button {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #007bff;
+  position: absolute;
+  top: 100px; /* Adjust this value to lower the button */
+  left: 20px;
+  padding: 5px 10px;
+  background-color: black;
   color: white;
   text-decoration: none;
   border-radius: 5px;
-  margin-bottom: 20px;
+  text-align: center;
 }
 
 .back-button:hover {
+  background-color: #0056b3;
+}
+
+/* Styles for the create button */
+.create-button-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.create-button {
+  padding: 10px 20px;
+  background-color: black;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.create-button:hover {
   background-color: #0056b3;
 }
 
@@ -134,8 +150,8 @@ p {
 .invoice-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 20px; /* Adjust this value to match the gap on SelectInvoiceTypePage */
+  margin-top: 10px; /* Adjust this value to match the distance on SelectInvoiceTypePage */
 }
 
 .invoice-actions button {

@@ -89,7 +89,7 @@
 
 /* Page styles */
 .products-page {
-  background-color: wheat;
+  background-image: url(/src/assets/images/eggshellbg.jpg);
   padding: 20px;
 }
 

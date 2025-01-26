@@ -8,9 +8,10 @@ const CreateInvoicePage = () => {
   const [customerName, setCustomerName] = useState('');
   const [date, setDate] = useState(new Date().toISOString().substr(0, 10));
   const [customerLocation, setCustomerLocation] = useState('');
-  const [products, setProducts] = useState([{ name: '', quantity: 1, serialNumbers: '', unitPrice: 0 }]);
+  const [products, setProducts] = useState([{ name: '', quantity: 1, serialNumbers: [''], unitPrice: 0 }]);
   const [tax, setTax] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [successMessage, setSuccessMessage] = useState('');
   const { addInvoice } = useInvoices();
   const navigate = useNavigate();
 
@@ -22,12 +23,24 @@ const CreateInvoicePage = () => {
   const handleProductChange = (index, field, value) => {
     const newProducts = [...products];
     newProducts[index][field] = value;
+    if (field === 'quantity') {
+      const quantity = parseInt(value, 10);
+      const serialNumbers = new Array(quantity).fill('').map((_, i) => newProducts[index].serialNumbers[i] || '');
+      newProducts[index].serialNumbers = serialNumbers;
+    }
+    setProducts(newProducts);
+  };
+
+  const handleSerialNumberChange = (productIndex, serialIndex, value) => {
+    const newProducts = [...products];
+    newProducts[productIndex].serialNumbers[serialIndex] = value;
     setProducts(newProducts);
   };
 
   const handleIncreaseQuantity = (index) => {
     const newProducts = [...products];
     newProducts[index].quantity += 1;
+    newProducts[index].serialNumbers.push('');
     setProducts(newProducts);
   };
 
@@ -35,12 +48,13 @@ const CreateInvoicePage = () => {
     const newProducts = [...products];
     if (newProducts[index].quantity > 1) {
       newProducts[index].quantity -= 1;
+      newProducts[index].serialNumbers.pop();
       setProducts(newProducts);
     }
   };
 
   const handleAddProduct = () => {
-    setProducts([...products, { name: '', quantity: 1, serialNumbers: '', unitPrice: 0 }]);
+    setProducts([...products, { name: '', quantity: 1, serialNumbers: [''], unitPrice: 0 }]);
   };
 
   const handleDeleteProduct = (index) => {
@@ -62,12 +76,19 @@ const CreateInvoicePage = () => {
       totalPrice,
     };
     await addInvoice(invoice);
-    navigate('/view-invoices');
+    setSuccessMessage('Invoice created successfully!');
+    setTimeout(() => {
+      navigate('/view-invoices');
+    }, 2000); // Redirect after 2 seconds
   };
 
   return (
     <div className="create-invoice-page">
+      <button className="back-to-create-invoice" onClick={() => navigate('/create-invoice')}>
+        Back to Create Invoice Page
+      </button>
       <h1>Create an Invoice</h1>
+      {successMessage && <div className="success-message">{successMessage}</div>}
       <form onSubmit={handleSubmit} className="invoice-form">
         <div className="form-group">
           <label htmlFor="customerName">Customer Name</label>
@@ -119,15 +140,17 @@ const CreateInvoicePage = () => {
                 <button type="button" onClick={() => handleIncreaseQuantity(index)}>+</button>
               </div>
             </div>
-            <div className="form-group">
-              <label htmlFor={`serialNumbers-${index}`}>Serial Number(s)</label>
-              <input
-                type="text"
-                id={`serialNumbers-${index}`}
-                value={product.serialNumbers}
-                onChange={(e) => handleProductChange(index, 'serialNumbers', e.target.value)}
-                required
-              />
+            <div className="form-group serial-number-group">
+              <label>Serial Number(s)</label>
+              {product.serialNumbers.map((serialNumber, serialIndex) => (
+                <input
+                  key={serialIndex}
+                  type="text"
+                  value={serialNumber}
+                  onChange={(e) => handleSerialNumberChange(index, serialIndex, e.target.value)}
+                  required
+                />
+              ))}
             </div>
             <div className="form-group">
               <label htmlFor={`unitPrice-${index}`}>Unit Price</label>

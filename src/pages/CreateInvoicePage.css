@@ -1,23 +1,29 @@
 .create-invoice-page {
   padding: 20px;
+  position: relative; /* To position the back button absolutely */
+  background-image: url('/src/assets/images/eggshellbg.jpg');
 }
 
 .create-invoice-page h1 {
   margin-bottom: 20px;
+  text-align: center; /* Center the heading */
 }
 
-.back-to-homepage {
-  display: inline-block;
-  margin-bottom: 20px;
+.back-to-create-invoice {
+  position: absolute;
+  top: 20px;
+  left: 20px;
   padding: 10px 20px;
-  background-color: #000;
+  background-color: #007bff;
   color: white;
   text-decoration: none;
+  border: none;
   border-radius: 5px;
+  cursor: pointer;
 }
 
-.back-to-homepage:hover {
-  background-color: #000;
+.back-to-create-invoice:hover {
+  background-color: #0056b3;
 }
 
 .invoice-form {
@@ -70,6 +76,20 @@
   padding: 5px 10px;
 }
 
+.serial-number-group {
+  display: flex;
+  flex-direction: column;
+  max-height: 150px; /* Set a fixed height */
+  overflow-y: auto; /* Add vertical scroll if needed */
+}
+
+.serial-number-group input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  margin-bottom: 5px;
+}
+
 button[type="submit"],
 button[type="button"] {
   padding: 10px 20px;
@@ -107,4 +127,13 @@ button[type="button"]:hover {
 
 .back-button:hover {
   background-color: #5a6268;
+}
+
+.success-message {
+  background-color: #28a745;
+  color: white;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  text-align: center;
 }

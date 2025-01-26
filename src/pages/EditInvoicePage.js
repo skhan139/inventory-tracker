@@ -1,12 +1,11 @@
 // src/pages/EditInvoicePage.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useInvoices } from '../context/InvoicesContext';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import './EditInvoicePage.css';
 
 const EditInvoicePage = () => {
-  const { index } = useParams();
-  const { invoices, updateInvoice } = useInvoices();
+  const { id } = useParams();
   const navigate = useNavigate();
 
   // Initialize state hooks
@@ -16,24 +15,46 @@ const EditInvoicePage = () => {
   const [products, setProducts] = useState([]);
   const [tax, setTax] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!invoices || !invoices[index]) {
+    if (!id) {
+      console.error('No invoice ID provided');
       navigate('/view-invoices');
       return;
     }
 
-    const invoice = invoices[index];
-    setCustomerName(invoice.customerName);
-    setDate(invoice.date);
-    setCustomerLocation(invoice.customerLocation);
-    setProducts(invoice.products.map(product => ({
-      ...product,
-      serialNumbers: Array.isArray(product.serialNumbers) ? product.serialNumbers : [product.serialNumbers]
-    })));
-    setTax(invoice.tax);
-    setTotalPrice(invoice.totalPrice);
-  }, [invoices, index, navigate]);
+    const fetchInvoice = async () => {
+      try {
+        const db = getFirestore();
+        const invoiceRef = doc(db, 'invoices', id);
+        const invoiceSnap = await getDoc(invoiceRef);
+
+        if (invoiceSnap.exists()) {
+          const invoice = invoiceSnap.data();
+          setCustomerName(invoice.customerName);
+          setDate(invoice.date);
+          setCustomerLocation(invoice.customerLocation);
+          setProducts(invoice.products.map(product => ({
+            ...product,
+            serialNumbers: Array.isArray(product.serialNumbers) ? product.serialNumbers : [product.serialNumbers]
+          })));
+          setTax(invoice.tax);
+          setTotalPrice(invoice.totalPrice);
+        } else {
+          console.log('No such document!');
+          navigate('/view-invoices');
+        }
+      } catch (error) {
+        console.error('Error fetching invoice:', error);
+        navigate('/view-invoices');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInvoice();
+  }, [id, navigate]);
 
   useEffect(() => {
     const total = products.reduce((acc, product) => acc + product.quantity * product.unitPrice, 0);
@@ -97,13 +118,14 @@ const EditInvoicePage = () => {
       tax,
       totalPrice,
     };
-    await updateInvoice(invoices[index].id, updatedInvoice);
+    const db = getFirestore();
+    const invoiceRef = doc(db, 'invoices', id);
+    await updateDoc(invoiceRef, updatedInvoice);
     navigate('/view-invoices');
   };
 
-  // Return null if invoices or the specific invoice is not available
-  if (!invoices || !invoices[index]) {
-    return null;
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -208,7 +230,7 @@ const EditInvoicePage = () => {
             readOnly
           />
         </div>
-        <button type="submit">Update Invoice</button>
+        <button type="submit">Save Invoice</button>
       </form>
     </div>
   );
