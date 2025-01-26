@@ -45,11 +45,13 @@ html, body {
 .home-page h1 {
   margin-bottom: 20px;
   animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
+  text-shadow: 2px 2px 4px gold; /* Add gold text shadow */
 }
 
 .home-page p {
   margin-bottom: 20px;
   animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
+  text-shadow: 2px 2px 4px gold; /* Add gold text shadow */
 }
 
 .login-page {

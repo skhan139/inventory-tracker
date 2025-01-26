@@ -1,6 +1,6 @@
 // src/pages/ViewInvoicesPage.js
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
 import generateStandardPDF from '../utils/generateStandardPDF';
 import generateAlleghenyPDF from '../utils/generateAlleghenyPDF';
@@ -65,9 +65,9 @@ const ViewInvoicesPage = () => {
         </div>
       ) : (
         <>
-          <Link to="/create-invoice" className="back-button">Back to Select Invoice Type</Link>
+          <button onClick={() => setViewingType(null)} className="back-button">Back to Select Invoice Type</button>
           <div className="create-button-container">
-            <Link to="/create-invoice" className="create-button">Create Invoice</Link>
+            <button onClick={() => navigate('/create-invoice')} className="create-button">Create Invoice</button>
           </div>
           <input
             type="text"

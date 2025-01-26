@@ -42,7 +42,7 @@ const Navbar = () => {
         <Link to="/">
           <img src={logo} alt="Logo" className="navbar-logo" />
         </Link>
-        <span className="navbar-title">K And M Inventory Tracker</span>
+        <span className="navbar-title">K&M Database</span>
       </div>
       <button className="navbar-toggle" onClick={toggleNavbar}>
         ☰
