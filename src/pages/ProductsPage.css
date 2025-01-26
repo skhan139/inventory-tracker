@@ -1,3 +1,12 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Header styles */
 .header {
   display: flex;
@@ -6,10 +15,12 @@
   padding: 10px 20px;
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .logo {
   height: 40px;
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .back-to-homepage {
@@ -19,6 +30,7 @@
   color: white;
   text-decoration: none;
   border-radius: 5px;
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .back-to-homepage:hover {
@@ -28,6 +40,7 @@
 /* Inventory section styles */
 .inventory-section {
   margin-bottom: 20px;
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .inventory-section h2 {
@@ -37,6 +50,7 @@
   padding: 10px; /* Add padding */
   border-radius: 5px; /* Add border radius */
   text-align: center; /* Center align text */
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .inventory-section button {
@@ -47,6 +61,7 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .inventory-section button:hover {
@@ -57,6 +72,7 @@
 .product-list {
   display: flex;
   flex-direction: column;
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .product-item {
@@ -67,10 +83,12 @@
   border: 1px solid #dee2e6;
   border-radius: 5px;
   margin-bottom: 10px;
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .product-item span {
   flex: 1;
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .product-item button {
@@ -81,6 +99,7 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .product-item button:hover {
@@ -91,6 +110,7 @@
 .products-page {
   background-image: url(/src/assets/images/eggshellbg.jpg);
   padding: 20px;
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 /* Show form button styles */
@@ -104,6 +124,7 @@
   cursor: pointer; /* Change cursor to pointer */
   margin: 20px auto; /* Add margin at the top and center horizontally */
   display: block; /* Make the button a block element to center it */
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
 .show-form-button:hover {
