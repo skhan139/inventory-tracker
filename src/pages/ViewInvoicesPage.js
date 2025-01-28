@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import generateStandardPDF from '../utils/generateStandardPDF';
 import generateAlleghenyPDF from '../utils/generateAlleghenyPDF';
 import './ViewInvoicesPage.css';
@@ -12,12 +13,32 @@ const ViewInvoicesPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState(null);
   const [viewingType, setViewingType] = useState(null); // null, 'standard', 'allegheny'
+  const [fulfilledOrders, setFulfilledOrders] = useState({}); // State to track fulfilled orders
 
   const navigate = useNavigate();
+  const db = getFirestore();
 
   useEffect(() => {
     console.log("Fetched Allegheny County Invoices in Component:", alleghenyCountyInvoices); // Debug log
   }, [alleghenyCountyInvoices]);
+
+  useEffect(() => {
+    const fetchFulfillmentStatus = async () => {
+      const newFulfilledOrders = {};
+      for (const invoice of invoices) {
+        const invoiceRef = doc(db, 'invoices', invoice.id);
+        const invoiceSnap = await getDoc(invoiceRef);
+        if (invoiceSnap.exists()) {
+          newFulfilledOrders[invoice.id] = invoiceSnap.data().fulfilled || false;
+        }
+      }
+      setFulfilledOrders(newFulfilledOrders);
+    };
+
+    if (invoices.length > 0) {
+      fetchFulfillmentStatus();
+    }
+  }, [invoices, db]);
 
   const handleEdit = (id) => {
     navigate(`/edit-invoice/${id}`);
@@ -45,6 +66,17 @@ const ViewInvoicesPage = () => {
     } else if (viewingType === 'allegheny') {
       generateAlleghenyPDF(invoice);
     }
+  };
+
+  const handleCheckboxChange = async (id) => {
+    const newFulfilledStatus = !fulfilledOrders[id];
+    setFulfilledOrders((prev) => ({
+      ...prev,
+      [id]: newFulfilledStatus,
+    }));
+
+    const invoiceRef = doc(db, 'invoices', id);
+    await updateDoc(invoiceRef, { fulfilled: newFulfilledStatus });
   };
 
   const filteredInvoices = invoices?.filter(invoice =>
@@ -106,6 +138,16 @@ const ViewInvoicesPage = () => {
                 <div className="invoice-actions">
                   <button onClick={() => handleEdit(invoice.id)}>Edit</button>
                   <button onClick={() => handleDownloadPDF(invoice)}>Download PDF</button>
+                </div>
+                <div className="order-fulfilled">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={fulfilledOrders[invoice.id] || false}
+                      onChange={() => handleCheckboxChange(invoice.id)}
+                    />
+                    Order Fulfilled?
+                  </label>
                 </div>
               </li>
             ))}
