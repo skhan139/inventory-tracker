@@ -1,17 +1,17 @@
 import React from 'react';
 import './ProductList.css';
 
-const ProductList = ({ products, onIncrease, onDecrease, onDelete, onMove }) => {
+const ProductList = ({ products, onIncrease, onDecrease, onDelete, onMove, onProductClick }) => {
   return (
     <div className="product-list">
       {products.map(product => (
-        <div key={product.id} className="product-item">
+        <div key={product.id} className="product-item" onClick={() => onProductClick(product)}>
           <span>{product.name}</span>
           <span>{product.quantity}</span>
-          <button onClick={() => onIncrease(product.id)}>+</button>
-          <button onClick={() => onDecrease(product.id)}>-</button>
-          <button onClick={() => onDelete(product.id)}>Delete</button>
-          <button onClick={() => onMove(product.id)}>Move</button>
+          <button onClick={(e) => { e.stopPropagation(); onIncrease(product.id); }}>+</button>
+          <button onClick={(e) => { e.stopPropagation(); onDecrease(product.id); }}>-</button>
+          <button onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}>Delete</button>
+          <button onClick={(e) => { e.stopPropagation(); onMove(product.id); }}>Move</button>
         </div>
       ))}
     </div>
