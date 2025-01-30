@@ -12,29 +12,29 @@ export const InvoicesProvider = ({ children }) => {
   const [invoices, setInvoices] = useState([]);
   const [alleghenyCountyInvoices, setAlleghenyCountyInvoices] = useState([]);
 
+  const fetchInvoices = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "invoices"));
+      const invoicesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log("Fetched Standard Invoices:", invoicesData); // Debug log
+      setInvoices(invoicesData);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+    }
+  };
+
+  const fetchAlleghenyCountyInvoices = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "alleghenyInvoices"));
+      const invoicesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log("Fetched Allegheny County Invoices:", invoicesData); // Debug log
+      setAlleghenyCountyInvoices(invoicesData);
+    } catch (error) {
+      console.error("Error fetching Allegheny County invoices:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "invoices"));
-        const invoicesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log("Fetched Standard Invoices:", invoicesData); // Debug log
-        setInvoices(invoicesData);
-      } catch (error) {
-        console.error("Error fetching invoices:", error);
-      }
-    };
-
-    const fetchAlleghenyCountyInvoices = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "alleghenyInvoices"));
-        const invoicesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log("Fetched Allegheny County Invoices:", invoicesData); // Debug log
-        setAlleghenyCountyInvoices(invoicesData);
-      } catch (error) {
-        console.error("Error fetching Allegheny County invoices:", error);
-      }
-    };
-
     fetchInvoices();
     fetchAlleghenyCountyInvoices();
   }, []);
@@ -73,7 +73,6 @@ export const InvoicesProvider = ({ children }) => {
   const deleteInvoice = async (id, isAllegheny = false) => {
     try {
       const collectionName = isAllegheny ? "alleghenyInvoices" : "invoices";
-      // Debug log to check the ID and collection name
       console.log(`Attempting to delete ${isAllegheny ? "Allegheny invoice" : "invoice"} with ID: ${id} from collection: ${collectionName}`);
       await deleteDoc(doc(db, collectionName, id));
       if (isAllegheny) {
@@ -88,7 +87,7 @@ export const InvoicesProvider = ({ children }) => {
   };
 
   return (
-    <InvoicesContext.Provider value={{ invoices, addInvoice, updateInvoice, deleteInvoice, alleghenyCountyInvoices }}>
+    <InvoicesContext.Provider value={{ invoices, addInvoice, updateInvoice, deleteInvoice, alleghenyCountyInvoices, fetchInvoices }}>
       {children}
     </InvoicesContext.Provider>
   );

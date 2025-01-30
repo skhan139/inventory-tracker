@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useInvoices } from '../context/InvoicesContext';
 import './CustomersPage.css';
 
 const CustomersPage = () => {
-  const { invoices, alleghenyCountyInvoices } = useInvoices();
+  const { invoices, alleghenyCountyInvoices, fetchInvoices } = useInvoices();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+
+  useEffect(() => {
+    fetchInvoices();
+  }, [fetchInvoices]);
 
   // Combine standard and Allegheny County invoices
   const allInvoices = [...invoices, ...alleghenyCountyInvoices];
