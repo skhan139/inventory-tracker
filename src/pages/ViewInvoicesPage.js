@@ -118,27 +118,33 @@ const ViewInvoicesPage = () => {
             {(viewingType === 'standard' ? filteredInvoices : filteredAlleghenyCountyInvoices).map((invoice, index) => (
               <li key={invoice.id} className="invoice-item">
                 <button className="delete-invoice" onClick={() => handleDelete(invoice.id)}>X</button>
-                <h2 className='invoice'>Invoice {index + 1}</h2>
-                <p>Customer Name: {invoice.customerName}</p>
-                <p>Date: {invoice.date}</p>
-                <p>Customer Location: {invoice.customerLocation}</p>
-                <h3>Products:</h3>
-                <ul>
-                  {invoice.products && invoice.products.map((product, idx) => (
-                    <li key={idx}>
-                      <p>Product: {product.name}</p>
-                      <p>Quantity: {product.quantity}</p>
-                      <p>Serial Numbers: {Array.isArray(product.serialNumbers) ? product.serialNumbers.join(', ') : 'N/A'}</p>
-                      <p>Unit Price: ${product.unitPrice !== undefined ? product.unitPrice.toFixed(2) : 'N/A'}</p>
-                    </li>
-                  ))}
-                </ul>
-                <p>Tax: {invoice.tax}%</p>
-                <p>Total Price: ${invoice.totalPrice !== undefined ? invoice.totalPrice.toFixed(2) : 'N/A'}</p>
+                <div className="invoice-header">
+                  <h2 className='invoice'>Invoice {index + 1}</h2>
+                </div>
+                <div className="invoice-details">
+                  <p>Customer Name: {invoice.customerName}</p>
+                  <p>Date: {invoice.date}</p>
+                  <p>Customer Location: {invoice.customerLocation}</p>
+                </div>
+                <div className="invoice-products">
+                  <h3>Products:</h3>
+                  <ul>
+                    {invoice.products && invoice.products.map((product, idx) => (
+                      <li key={idx}>
+                        <p>Product: {product.name}</p>
+                        <p>Quantity: {product.quantity}</p>
+                        <p>Serial Numbers: {Array.isArray(product.serialNumbers) ? product.serialNumbers.join(', ') : 'N/A'}</p>
+                        <p>Unit Price: ${product.unitPrice !== undefined ? product.unitPrice.toFixed(2) : 'N/A'}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
                 <div className="invoice-actions">
                   <button onClick={() => handleEdit(invoice.id)}>Edit</button>
                   <button onClick={() => handleDownloadPDF(invoice)}>Download PDF</button>
                 </div>
+                <p>Tax: {invoice.tax}%</p>
+                <p>Total Price: ${invoice.totalPrice !== undefined ? invoice.totalPrice.toFixed(2) : 'N/A'}</p>
                 <div className="order-fulfilled">
                   <label>
                     <input
