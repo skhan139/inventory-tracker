@@ -1,10 +1,8 @@
 // uploadProducts.js
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import products from './src/Products.js'; // Ensure the correct path and file extension
-import dotenv from 'dotenv';
-
-dotenv.config();
+const { initializeApp } = require('firebase/app');
+const { getFirestore, collection, addDoc } = require('firebase/firestore');
+const products = require('./src/Products.js'); // Ensure the correct path and file extension
+require('dotenv').config();
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,

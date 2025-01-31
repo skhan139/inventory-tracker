@@ -59,15 +59,18 @@ const Navbar = () => {
               <button className="navbar-button">Inventory</button>
             </Link>
           </li>
-          <li className="navbar-item">
-            <Link to="/create-invoice" className="navbar-link" onClick={handleProtectedLinkClick}>
-              <button className="navbar-button">Create Invoice</button>
-            </Link>
-          </li>
-          <li className="navbar-item">
-            <Link to="/view-invoices" className="navbar-link" onClick={handleProtectedLinkClick}>
-              <button className="navbar-button">View Invoices</button>
-            </Link>
+          <li className="navbar-item dropdown">
+            <button className="navbar-button navbar-button-invoices">
+              Invoices
+            </button>
+            <div className="dropdown-menu">
+              <Link to="/create-invoice" className="navbar-link" onClick={handleProtectedLinkClick}>
+                <button className="navbar-button">Create Invoice</button>
+              </Link>
+              <Link to="/view-invoices" className="navbar-link" onClick={handleProtectedLinkClick}>
+                <button className="navbar-button">View Invoices</button>
+              </Link>
+            </div>
           </li>
           <li className="navbar-item">
             <Link to="/customers" className="navbar-link" onClick={handleProtectedLinkClick}>

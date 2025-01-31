@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase'; // Import Firebase
 import ProductList from '../components/ProductList';
 import SearchBar from '../components/SearchBar';
@@ -152,6 +152,17 @@ const ProductsPage = () => {
     }
   };
 
+  const handleDeleteProductFromList = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'products', id));
+      setProducts(products.filter(product => product.id !== id));
+      alert('Product deleted successfully');
+    } catch (error) {
+      console.error('Error deleting product: ', error);
+      alert('Failed to delete product');
+    }
+  };
+
   const handleMoveProduct = (id, location) => {
     setCurrentProductId(id);
     setCurrentLocation(location);
@@ -197,6 +208,12 @@ const ProductsPage = () => {
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Filter out duplicate products based on name
+  const uniqueProducts = Array.from(new Set(filteredProducts.map(product => product.name)))
+    .map(name => {
+      return filteredProducts.find(product => product.name === name);
+    });
+
   return (
     <div className="products-page">
       <button className="show-form-button" onClick={() => setIsProductFormVisible(!isProductFormVisible)}>
@@ -215,7 +232,7 @@ const ProductsPage = () => {
         </button>
         {kmStorageVisible && (
           <ProductList
-            products={filteredProducts.map(product => ({ ...product, quantity: product.quantities.kmStorage }))}
+            products={uniqueProducts.filter(product => product.quantities.kmStorage > 0).map(product => ({ ...product, quantity: product.quantities.kmStorage }))}
             onIncrease={(id) => handleIncrease(id, 'kmStorage')}
             onDecrease={(id) => handleDecrease(id, 'kmStorage')}
             onDelete={(id) => handleDeleteProduct(id, 'kmStorage')}
@@ -232,7 +249,7 @@ const ProductsPage = () => {
         </button>
         {keyserStorageVisible && (
           <ProductList
-            products={filteredProducts.map(product => ({ ...product, quantity: product.quantities.keyserStorage }))}
+            products={uniqueProducts.filter(product => product.quantities.keyserStorage > 0).map(product => ({ ...product, quantity: product.quantities.keyserStorage }))}
             onIncrease={(id) => handleIncrease(id, 'keyserStorage')}
             onDecrease={(id) => handleDecrease(id, 'keyserStorage')}
             onDelete={(id) => handleDeleteProduct(id, 'keyserStorage')}
@@ -249,7 +266,7 @@ const ProductsPage = () => {
         </button>
         {gfcStorageVisible && (
           <ProductList
-            products={filteredProducts.map(product => ({ ...product, quantity: product.quantities.gfcCumberlandStorage }))}
+            products={uniqueProducts.filter(product => product.quantities.gfcCumberlandStorage > 0).map(product => ({ ...product, quantity: product.quantities.gfcCumberlandStorage }))}
             onIncrease={(id) => handleIncrease(id, 'gfcCumberlandStorage')}
             onDecrease={(id) => handleDecrease(id, 'gfcCumberlandStorage')}
             onDelete={(id) => handleDeleteProduct(id, 'gfcCumberlandStorage')}
@@ -275,6 +292,7 @@ const ProductsPage = () => {
           products={products}
           onClose={() => setIsAddExistingProductModalVisible(false)}
           onAdd={handleAddExistingProduct}
+          onDelete={handleDeleteProductFromList}
         />
       )}
 

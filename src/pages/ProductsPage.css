@@ -45,7 +45,7 @@
 
 .inventory-section h2 {
   margin-bottom: 10px;
-  color: white; /* Set text color to black */
+  color: white; /* Set text color to white */
   background-color: black; /* Add background color */
   padding: 10px; /* Add padding */
   border-radius: 5px; /* Add border radius */
@@ -128,5 +128,22 @@
 }
 
 .show-form-button:hover {
+  background-color: #0056b3; /* Change background color on hover */
+}
+
+/* Add existing product button styles */
+.add-existing-product-button {
+  padding: 10px 20px;
+  background-color: #000; /* Button background color set to black */
+  color: white; /* Button text color */
+  border: none; /* Remove border */
+  border-radius: 5px; /* Add border radius */
+  cursor: pointer; /* Change cursor to pointer */
+  margin: 20px auto; /* Add margin at the top and center horizontally */
+  display: block; /* Make the button a block element to center it */
+  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
+}
+
+.add-existing-product-button:hover {
   background-color: #0056b3; /* Change background color on hover */
 }
