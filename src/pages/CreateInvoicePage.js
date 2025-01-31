@@ -1,4 +1,3 @@
-// src/pages/CreateInvoicePage.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
@@ -53,6 +52,8 @@ const CreateInvoicePage = () => {
       const selectedProduct = availableProducts.find(product => product.name === value);
       if (selectedProduct) {
         newProducts[index].unitPrice = selectedProduct.unitPrice;
+      } else {
+        newProducts[index].unitPrice = 0; // Reset unit price if manual entry
       }
     }
     if (field === 'quantity') {
@@ -160,7 +161,6 @@ const CreateInvoicePage = () => {
                 id={`product-${index}`}
                 value={product.name}
                 onChange={(e) => handleProductChange(index, 'name', e.target.value)}
-                required
               >
                 <option value="">Select a product</option>
                 {availableProducts.map((availableProduct, i) => (
