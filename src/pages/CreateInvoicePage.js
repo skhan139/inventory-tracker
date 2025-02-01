@@ -26,6 +26,8 @@ const CreateInvoicePage = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [successMessage, setSuccessMessage] = useState('');
   const [availableProducts, setAvailableProducts] = useState([]);
+  const [discountType, setDiscountType] = useState('percent'); // 'percent' or 'dollar'
+  const [discountValue, setDiscountValue] = useState(0);
   const { addInvoice } = useInvoices();
   const navigate = useNavigate();
 
@@ -42,8 +44,17 @@ const CreateInvoicePage = () => {
 
   useEffect(() => {
     const total = products.reduce((acc, product) => acc + product.quantity * product.unitPrice, 0);
-    setTotalPrice(total + (total * (isNaN(tax) ? 0 : tax) / 100));
-  }, [products, tax]);
+    const totalWithTax = total + (total * (isNaN(tax) ? 0 : tax) / 100);
+    let finalTotal = totalWithTax;
+
+    if (discountType === 'percent') {
+      finalTotal -= (totalWithTax * (isNaN(discountValue) ? 0 : discountValue) / 100);
+    } else if (discountType === 'dollar') {
+      finalTotal -= (isNaN(discountValue) ? 0 : discountValue);
+    }
+
+    setTotalPrice(finalTotal);
+  }, [products, tax, discountType, discountValue]);
 
   const handleProductChange = (index, field, value) => {
     const newProducts = [...products];
@@ -217,6 +228,26 @@ const CreateInvoicePage = () => {
             value={tax}
             onChange={(e) => setTax(parseFloat(e.target.value))}
             required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="discountType">Discount Type</label>
+          <select
+            id="discountType"
+            value={discountType}
+            onChange={(e) => setDiscountType(e.target.value)}
+          >
+            <option value="percent">Percent</option>
+            <option value="dollar">Dollar</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="discountValue">Discount Value</label>
+          <input
+            type="number"
+            id="discountValue"
+            value={discountValue}
+            onChange={(e) => setDiscountValue(parseFloat(e.target.value))}
           />
         </div>
         <div className="form-group">
