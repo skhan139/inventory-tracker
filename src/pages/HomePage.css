@@ -112,3 +112,66 @@ h1, p {
   color: white;
   animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+  .home-page {
+    padding: 10px;
+  }
+
+  .welcome-container {
+    padding: 15px;
+    width: 90%;
+  }
+
+  .home-page h1 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+  }
+
+  .home-page p {
+    font-size: 1em;
+    margin-bottom: 15px;
+  }
+
+  .login-form {
+    width: 90%;
+    padding: 15px;
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-page {
+    padding: 5px;
+  }
+
+  .welcome-container {
+    padding: 10px;
+    width: 100%;
+  }
+
+  .home-page h1 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+
+  .home-page p {
+    font-size: 0.9em;
+    margin-bottom: 10px;
+  }
+
+  .login-form {
+    width: 100%;
+    padding: 10px;
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    padding: 8px;
+  }
+}

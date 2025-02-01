@@ -50,10 +50,14 @@ const generateStandardPDF = (invoice) => {
       product.unitPrice !== undefined ? `$${product.unitPrice.toFixed(2)}` : 'N/A'
     ]);
 
-    // Add tax and total price as additional rows
+    // Add tax, discount, and total price as additional rows
     rows.push([
       { content: 'Tax', colSpan: 3, styles: { halign: 'right' } },
       `${invoice.tax}%`
+    ]);
+    rows.push([
+      { content: 'Discount', colSpan: 3, styles: { halign: 'right' } },
+      invoice.discountType === 'percent' ? `${invoice.discountValue}%` : `$${invoice.discountValue.toFixed(2)}`
     ]);
     rows.push([
       { content: 'Total Price', colSpan: 3, styles: { halign: 'right' } },
@@ -114,10 +118,14 @@ const generatePDFWithoutLogo = (doc, invoice) => {
     product.unitPrice !== undefined ? `$${product.unitPrice.toFixed(2)}` : 'N/A'
   ]);
 
-  // Add tax and total price as additional rows
+  // Add tax, discount, and total price as additional rows
   rows.push([
     { content: 'Tax', colSpan: 3, styles: { halign: 'right' } },
     `${invoice.tax}%`
+  ]);
+  rows.push([
+    { content: 'Discount', colSpan: 3, styles: { halign: 'right' } },
+    invoice.discountType === 'percent' ? `${invoice.discountValue}%` : `$${invoice.discountValue.toFixed(2)}`
   ]);
   rows.push([
     { content: 'Total Price', colSpan: 3, styles: { halign: 'right' } },

@@ -87,6 +87,10 @@ const ViewInvoicesPage = () => {
     invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
+  // Sort invoices by date in descending order
+  const sortedInvoices = filteredInvoices.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sortedAlleghenyCountyInvoices = filteredAlleghenyCountyInvoices.sort((a, b) => new Date(b.date) - new Date(a.date));
+
   return (
     <div className="view-invoices-page">
       <h1 className='invoice'>View Previous Invoices</h1>
@@ -108,14 +112,14 @@ const ViewInvoicesPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-bar"
           />
-          {viewingType === 'standard' && filteredInvoices.length === 0 && (
+          {viewingType === 'standard' && sortedInvoices.length === 0 && (
             <p>No standard invoices available.</p>
           )}
-          {viewingType === 'allegheny' && filteredAlleghenyCountyInvoices.length === 0 && (
+          {viewingType === 'allegheny' && sortedAlleghenyCountyInvoices.length === 0 && (
             <p>No Allegheny County invoices available.</p>
           )}
           <ul>
-            {(viewingType === 'standard' ? filteredInvoices : filteredAlleghenyCountyInvoices).map((invoice, index) => (
+            {(viewingType === 'standard' ? sortedInvoices : sortedAlleghenyCountyInvoices).map((invoice, index) => (
               <li key={invoice.id} className="invoice-item">
                 <button className="delete-invoice" onClick={() => handleDelete(invoice.id)}>X</button>
                 <div className="invoice-header">
@@ -144,17 +148,18 @@ const ViewInvoicesPage = () => {
                   <button onClick={() => handleDownloadPDF(invoice)}>Download PDF</button>
                 </div>
                 <p>Tax: {invoice.tax}%</p>
-                <p>Total Price: ${invoice.totalPrice !== undefined ? invoice.totalPrice.toFixed(2) : 'N/A'}</p>
-                <div className="order-fulfilled">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={fulfilledOrders[invoice.id] || false}
-                      onChange={() => handleCheckboxChange(invoice.id)}
-                    />
-                    Order Fulfilled?
-                  </label>
-                </div>
+                <p>Discount: {invoice.discountType === 'percent' ? `${invoice.discountValue}%` : `$${invoice.discountValue !== undefined ? invoice.discountValue.toFixed(2) : 'N/A'}`}</p>
+<p>Total Price: ${invoice.totalPrice !== undefined ? invoice.totalPrice.toFixed(2) : 'N/A'}</p>
+<div className="order-fulfilled">
+  <label>
+    <input
+      type="checkbox"
+      checked={fulfilledOrders[invoice.id] || false}
+      onChange={() => handleCheckboxChange(invoice.id)}
+    />
+    Order Fulfilled?
+  </label>
+</div>
               </li>
             ))}
           </ul>

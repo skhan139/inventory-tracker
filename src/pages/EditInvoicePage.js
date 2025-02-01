@@ -1,69 +1,94 @@
-// src/pages/EditInvoicePage.js
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
-import './EditInvoicePage.css';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useInvoices } from '../context/InvoicesContext';
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import './CreateInvoicePage.css';
+
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const EditInvoicePage = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-
-  // Initialize state hooks
   const [customerName, setCustomerName] = useState('');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().substr(0, 10));
   const [customerLocation, setCustomerLocation] = useState('');
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([{ name: '', quantity: 1, serialNumbers: [''], unitPrice: 0 }]);
   const [tax, setTax] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [availableProducts, setAvailableProducts] = useState([]);
+  const [discountType, setDiscountType] = useState('percent'); // 'percent' or 'dollar'
+  const [discountValue, setDiscountValue] = useState(0);
+  const { updateInvoice } = useInvoices();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!id) {
-      console.error('No invoice ID provided');
-      navigate('/view-invoices');
-      return;
-    }
+    const fetchProducts = async () => {
+      const productsCollection = collection(db, 'products');
+      const productsSnapshot = await getDocs(productsCollection);
+      const productsList = productsSnapshot.docs.map(doc => doc.data());
+      setAvailableProducts(productsList);
+    };
 
     const fetchInvoice = async () => {
-      try {
-        const db = getFirestore();
-        const invoiceRef = doc(db, 'invoices', id);
-        const invoiceSnap = await getDoc(invoiceRef);
-
-        if (invoiceSnap.exists()) {
-          const invoice = invoiceSnap.data();
-          setCustomerName(invoice.customerName);
-          setDate(invoice.date);
-          setCustomerLocation(invoice.customerLocation);
-          setProducts(invoice.products.map(product => ({
-            ...product,
-            serialNumbers: Array.isArray(product.serialNumbers) ? product.serialNumbers : [product.serialNumbers]
-          })));
-          setTax(invoice.tax);
-          setTotalPrice(invoice.totalPrice);
-        } else {
-          console.log('No such document!');
-          navigate('/view-invoices');
-        }
-      } catch (error) {
-        console.error('Error fetching invoice:', error);
-        navigate('/view-invoices');
-      } finally {
-        setLoading(false);
+      const invoiceDoc = doc(db, 'invoices', id);
+      const invoiceSnapshot = await getDoc(invoiceDoc);
+      if (invoiceSnapshot.exists()) {
+        const invoiceData = invoiceSnapshot.data();
+        setCustomerName(invoiceData.customerName);
+        setDate(invoiceData.date);
+        setCustomerLocation(invoiceData.customerLocation);
+        setProducts(invoiceData.products);
+        setTax(invoiceData.tax);
+        setDiscountType(invoiceData.discountType || 'percent');
+        setDiscountValue(invoiceData.discountValue || 0);
       }
     };
 
+    fetchProducts();
     fetchInvoice();
-  }, [id, navigate]);
+  }, [id]);
 
   useEffect(() => {
     const total = products.reduce((acc, product) => acc + product.quantity * product.unitPrice, 0);
-    setTotalPrice(total + (total * tax / 100));
-  }, [products, tax]);
+    const totalWithTax = total + (total * (isNaN(tax) ? 0 : tax) / 100);
+    let finalTotal = totalWithTax;
 
-  const handleProductChange = (productIndex, field, value) => {
+    if (discountType === 'percent') {
+      finalTotal -= (totalWithTax * (isNaN(discountValue) ? 0 : discountValue) / 100);
+    } else if (discountType === 'dollar') {
+      finalTotal -= (isNaN(discountValue) ? 0 : discountValue);
+    }
+
+    setTotalPrice(finalTotal);
+  }, [products, tax, discountType, discountValue]);
+
+  const handleProductChange = (index, field, value) => {
     const newProducts = [...products];
-    newProducts[productIndex][field] = value;
+    newProducts[index][field] = value;
+    if (field === 'name') {
+      const selectedProduct = availableProducts.find(product => product.name === value);
+      if (selectedProduct) {
+        newProducts[index].unitPrice = selectedProduct.unitPrice;
+      } else {
+        newProducts[index].unitPrice = 0; // Reset unit price if manual entry
+      }
+    }
+    if (field === 'quantity') {
+      const quantity = parseInt(value, 10);
+      const serialNumbers = new Array(quantity).fill('').map((_, i) => newProducts[index].serialNumbers[i] || '');
+      newProducts[index].serialNumbers = serialNumbers;
+    }
     setProducts(newProducts);
   };
 
@@ -73,28 +98,18 @@ const EditInvoicePage = () => {
     setProducts(newProducts);
   };
 
-  const handleAddSerialNumber = (productIndex) => {
+  const handleIncreaseQuantity = (index) => {
     const newProducts = [...products];
-    newProducts[productIndex].serialNumbers.push('');
+    newProducts[index].quantity += 1;
+    newProducts[index].serialNumbers.push('');
     setProducts(newProducts);
   };
 
-  const handleDeleteSerialNumber = (productIndex, serialIndex) => {
+  const handleDecreaseQuantity = (index) => {
     const newProducts = [...products];
-    newProducts[productIndex].serialNumbers.splice(serialIndex, 1);
-    setProducts(newProducts);
-  };
-
-  const handleIncreaseQuantity = (productIndex) => {
-    const newProducts = [...products];
-    newProducts[productIndex].quantity += 1;
-    setProducts(newProducts);
-  };
-
-  const handleDecreaseQuantity = (productIndex) => {
-    const newProducts = [...products];
-    if (newProducts[productIndex].quantity > 1) {
-      newProducts[productIndex].quantity -= 1;
+    if (newProducts[index].quantity > 1) {
+      newProducts[index].quantity -= 1;
+      newProducts[index].serialNumbers.pop();
       setProducts(newProducts);
     }
   };
@@ -103,34 +118,41 @@ const EditInvoicePage = () => {
     setProducts([...products, { name: '', quantity: 1, serialNumbers: [''], unitPrice: 0 }]);
   };
 
-  const handleDeleteProduct = (productIndex) => {
-    const newProducts = products.filter((_, i) => i !== productIndex);
+  const handleDeleteProduct = (index) => {
+    const newProducts = products.filter((_, i) => i !== index);
     setProducts(newProducts);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const updatedInvoice = {
+    const invoice = {
       customerName,
       date,
       customerLocation,
-      products,
+      products: products.map(product => ({
+        ...product,
+        unitPrice: product.unitPrice || 0 // Ensure unitPrice is defined
+      })),
       tax,
       totalPrice,
+      discountType,
+      discountValue,
     };
-    const db = getFirestore();
-    const invoiceRef = doc(db, 'invoices', id);
-    await updateDoc(invoiceRef, updatedInvoice);
-    navigate('/view-invoices');
+    const invoiceDoc = doc(db, 'invoices', id);
+    await updateDoc(invoiceDoc, invoice);
+    setSuccessMessage('Invoice updated successfully!');
+    setTimeout(() => {
+      navigate('/view-invoices');
+    }, 2000); // Redirect after 2 seconds
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div className="edit-invoice-page">
+    <div className="create-invoice-page">
+      <button className="back-to-create-invoice" onClick={() => navigate('/view-invoices')}>
+        Back to Invoices
+      </button>
       <h1>Edit Invoice</h1>
+      {successMessage && <div className="success-message">{successMessage}</div>}
       <form onSubmit={handleSubmit} className="invoice-form">
         <div className="form-group">
           <label htmlFor="customerName">Customer Name</label>
@@ -162,52 +184,59 @@ const EditInvoicePage = () => {
             required
           />
         </div>
-        {products.map((product, productIndex) => (
-          <div key={productIndex} className="product-group">
+        {products.map((product, index) => (
+          <div key={index} className="product-group">
             <div className="form-group">
-              <label htmlFor={`product-${productIndex}`}>Product</label>
+              <label htmlFor={`product-${index}`}>Product</label>
+              <select
+                id={`product-${index}`}
+                value={product.name}
+                onChange={(e) => handleProductChange(index, 'name', e.target.value)}
+              >
+                <option value="">Select a product</option>
+                {availableProducts.map((availableProduct, i) => (
+                  <option key={i} value={availableProduct.name}>{availableProduct.name}</option>
+                ))}
+              </select>
               <input
                 type="text"
-                id={`product-${productIndex}`}
+                id={`product-${index}-manual`}
                 value={product.name}
-                onChange={(e) => handleProductChange(productIndex, 'name', e.target.value)}
-                required
+                onChange={(e) => handleProductChange(index, 'name', e.target.value)}
+                placeholder="Or enter manually"
               />
             </div>
             <div className="form-group">
               <label>Quantity</label>
               <div className="quantity-controls">
-                <button type="button" onClick={() => handleDecreaseQuantity(productIndex)}>-</button>
+                <button type="button" onClick={() => handleDecreaseQuantity(index)}>-</button>
                 <span>{product.quantity}</span>
-                <button type="button" onClick={() => handleIncreaseQuantity(productIndex)}>+</button>
+                <button type="button" onClick={() => handleIncreaseQuantity(index)}>+</button>
               </div>
             </div>
-            <div className="form-group">
-              <label>Serial Numbers</label>
+            <div className="form-group serial-number-group">
+              <label>Serial Number(s)</label>
               {product.serialNumbers.map((serialNumber, serialIndex) => (
-                <div key={serialIndex} className="serial-number-group">
-                  <input
-                    type="text"
-                    value={serialNumber}
-                    onChange={(e) => handleSerialNumberChange(productIndex, serialIndex, e.target.value)}
-                    required
-                  />
-                  <button type="button" onClick={() => handleDeleteSerialNumber(productIndex, serialIndex)}>Delete Serial Number</button>
-                </div>
+                <input
+                  key={serialIndex}
+                  type="text"
+                  value={serialNumber}
+                  onChange={(e) => handleSerialNumberChange(index, serialIndex, e.target.value)}
+                  required
+                />
               ))}
-              <button type="button" onClick={() => handleAddSerialNumber(productIndex)}>Add Serial Number</button>
             </div>
             <div className="form-group">
-              <label htmlFor={`unitPrice-${productIndex}`}>Unit Price</label>
+              <label htmlFor={`unitPrice-${index}`}>Unit Price</label>
               <input
                 type="number"
-                id={`unitPrice-${productIndex}`}
+                id={`unitPrice-${index}`}
                 value={product.unitPrice}
-                onChange={(e) => handleProductChange(productIndex, 'unitPrice', parseFloat(e.target.value))}
+                onChange={(e) => handleProductChange(index, 'unitPrice', parseFloat(e.target.value))}
                 required
               />
             </div>
-            <button type="button" className="delete-product" onClick={() => handleDeleteProduct(productIndex)}>Delete this product</button>
+            <button type="button" className="delete-product" onClick={() => handleDeleteProduct(index)}>Delete this product</button>
           </div>
         ))}
         <button type="button" onClick={handleAddProduct}>Add Another Product</button>
@@ -222,15 +251,35 @@ const EditInvoicePage = () => {
           />
         </div>
         <div className="form-group">
+          <label htmlFor="discountType">Discount Type</label>
+          <select
+            id="discountType"
+            value={discountType}
+            onChange={(e) => setDiscountType(e.target.value)}
+          >
+            <option value="percent">Percent</option>
+            <option value="dollar">Dollar</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="discountValue">Discount Value</label>
+          <input
+            type="number"
+            id="discountValue"
+            value={discountValue}
+            onChange={(e) => setDiscountValue(parseFloat(e.target.value))}
+          />
+        </div>
+        <div className="form-group">
           <label htmlFor="totalPrice">Total Price</label>
           <input
             type="number"
             id="totalPrice"
-            value={totalPrice}
+            value={isNaN(totalPrice) ? '' : totalPrice}
             readOnly
           />
         </div>
-        <button type="submit">Save Invoice</button>
+        <button type="submit">Update Invoice</button>
       </form>
     </div>
   );

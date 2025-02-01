@@ -108,7 +108,7 @@ html, body {
   flex-direction: column;
   position: absolute;
   top: 100%;
-  left: 60%; /* Adjusted to shift the dropdown menu to the right */
+  left: 50%; /* Center the dropdown menu */
   transform: translateX(-50%);
   background-color: black;
   border: 2px solid #4a4a4a;
@@ -132,6 +132,7 @@ html, body {
   text-align: left;
   padding: 10px;
   padding-left: 5px; /* Shift buttons to the left */
+  padding-right: 5px; /* Adjust padding on the right side */
 }
 
 .dropdown-menu .navbar-button:hover {
@@ -139,6 +140,11 @@ html, body {
 }
 
 @media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .navbar-buttons {
     display: none;
     flex-direction: column;
