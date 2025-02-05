@@ -148,12 +148,16 @@ const RevenuePage = () => {
     setSelectedGraph(e.target.value);
   };
 
+  const formatNumber = (number) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(number);
+  };
+
   return (
     <div className="revenue-page">
       <h1>Total Gross Revenue</h1>
-      <p>Total Revenue: ${totalRevenue.toFixed(2)}</p>
-      <p>Total Tax Revenue: ${totalTaxRevenue.toFixed(2)}</p>
-      <p>Gross Profit: ${grossProfit.toFixed(2)}</p>
+      <p>Total Revenue: {formatNumber(totalRevenue)}</p>
+      <p>Total Tax Revenue: {formatNumber(totalTaxRevenue)}</p>
+      <p>Gross Profit: {formatNumber(grossProfit)}</p>
       <div className="graph-selector">
         <label htmlFor="graphType">Select Graph Type: </label>
         <select id="graphType" value={selectedGraph} onChange={handleGraphChange}>

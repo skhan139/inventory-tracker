@@ -54,29 +54,138 @@ html, body {
   border-color: #5a5a5a;
 }
 
+.phone-number-section {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-number-input {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+}
+
+.save-phone-number-button,
+.delete-phone-number-button {
+  padding: 10px 20px;
+  margin: 5px;
+  background-color: #2e2e2e;
+  color: white;
+  border: 2px solid #4a4a4a;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.save-phone-number-button:hover,
+.delete-phone-number-button:hover {
+  background-color: #3a3a3a;
+  border-color: #5a5a5a;
+}
+
+.edit-phone-number-button {
+  padding: 5px 10px;
+  margin-left: 10px;
+  background-color: #2e2e2e;
+  color: white;
+  border: 2px solid #4a4a4a;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.edit-phone-number-button:hover {
+  background-color: #3a3a3a;
+  border-color: #5a5a5a;
+}
+
+.success-message {
+  color: green;
+  margin-top: 10px;
+}
+
+.saved-phone-number {
+  font-size: 16px;
+  color: #2e2e2e;
+  background-color: white;
+  padding: 5px;
+  border-radius: 5px;
+}
+
 .invoice-list {
   list-style-type: none;
   padding: 0;
   margin-top: 10px;
   text-align: left;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto; /* Center the invoice list */
 }
 
 .invoice-item {
-  background-color: #f8f9fa;
-  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  padding: 20px;
   border: 1px solid #dee2e6;
   border-radius: 5px;
-  margin-bottom: 10px;
+  background-color: #fff;
+  position: relative;
 }
 
-.product-item {
-  background-color: #e9ecef;
-  padding: 5px;
-  border: 1px solid #ced4da;
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.invoice-details {
+  margin-bottom: 20px;
+}
+
+.invoice-products {
+  margin-bottom: 20px;
+}
+
+.invoice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.invoice-actions button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
   border-radius: 5px;
-  margin-bottom: 5px;
+  cursor: pointer;
+  flex-grow: 1;
+  text-align: center;
+  font-size: 16px;
 }
 
-.customers {
+.invoice-actions button:hover {
+  background-color: #0056b3;
+}
+
+.delete-invoice {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
   color: black;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.delete-invoice:hover {
+  color: red;
 }

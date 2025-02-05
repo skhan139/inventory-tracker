@@ -26,6 +26,7 @@ html, body {
 .navbar-logo-title {
   display: flex;
   align-items: center;
+  margin-left: -20px; /* Slide the logo and title to the left */
   animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 
@@ -39,7 +40,7 @@ html, body {
 
 .navbar-title {
   color: white;
-  margin-left: 20px; /* Increased margin for better spacing */
+  margin-left: 10px; /* Adjusted margin for better spacing */
   font-size: 24px; /* Increased font size for the title */
   text-shadow: 2px 2px 4px gold; /* Added gold text shadow */
   animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
