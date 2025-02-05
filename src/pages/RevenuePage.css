@@ -1,0 +1,39 @@
+/* src/pages/RevenuePage.css */
+.revenue-page {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .revenue-page h1 {
+    margin-bottom: 20px;
+  }
+  
+  .revenue-page h2 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .revenue-page p {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .revenue-page p.description {
+    font-size: 18px;
+    font-weight: normal;
+    margin-bottom: 10px;
+  }
+  
+  .graph-selector {
+    margin: 20px 0;
+  }
+  
+  .graph-selector label {
+    font-size: 18px;
+    margin-right: 10px;
+  }
+  
+  .graph-selector select {
+    font-size: 18px;
+    padding: 5px;
+  }

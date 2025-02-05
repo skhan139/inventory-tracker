@@ -10,6 +10,7 @@ import CustomersPage from './pages/CustomersPage';
 import SuppliersPage from './pages/SuppliersPage'; // Import SuppliersPage
 import SelectInvoiceTypePage from './pages/SelectInvoiceTypePage'; // Import SelectInvoiceTypePage
 import CreateAlleghenyCountyInvoicePage from './pages/CreateAlleghenyCountyInvoicePage'; // Import CreateAlleghenyCountyInvoicePage
+import RevenuePage from './pages/RevenuePage'; // Import RevenuePage
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -35,6 +36,7 @@ const App = () => {
               <Route path="/edit-invoice/:id" element={<PrivateRoute element={EditInvoicePage} />} /> {/* Ensure this route is correct */}
               <Route path="/customers" element={<PrivateRoute element={CustomersPage} />} />
               <Route path="/suppliers" element={<PrivateRoute element={SuppliersPage} />} /> {/* Add route for SuppliersPage */}
+              <Route path="/revenue" element={<PrivateRoute element={RevenuePage} />} /> {/* Add route for RevenuePage */}
             </Routes>
           </div>
         </InvoicesProvider>
