@@ -34,3 +34,38 @@ html, body {
 .invoice-type-button:hover {
   background-color: #0056b3;
 }
+
+.rules-section {
+  margin-top: 40px;
+}
+
+.rules-section h1 {
+  margin-bottom: 20px;
+}
+
+.rules-container {
+  display: flex;
+  justify-content: space-around;
+  text-align: left;
+}
+
+.rule {
+  width: 30%;
+}
+
+.rule h2 {
+  margin-bottom: 10px;
+}
+
+.rule ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.rule li {
+  margin-bottom: 5px;
+}
+
+.rule h2 {
+  color: black;
+}

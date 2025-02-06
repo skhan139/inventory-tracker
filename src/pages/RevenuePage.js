@@ -154,10 +154,12 @@ const RevenuePage = () => {
 
   return (
     <div className="revenue-page">
-      <h1>Total Gross Revenue</h1>
-      <p>Total Revenue: {formatNumber(totalRevenue)}</p>
-      <p>Total Tax Revenue: {formatNumber(totalTaxRevenue)}</p>
-      <p>Gross Profit: {formatNumber(grossProfit)}</p>
+      <div className="highlight-container">
+        <button className="highlight">Revenue Statistics</button>
+        <button className="highlight">Total Revenue: {formatNumber(totalRevenue)}</button>
+        <button className="highlight">Total Tax Revenue: {formatNumber(totalTaxRevenue)}</button>
+        <button className="highlight">Gross Profit: {formatNumber(grossProfit)}</button>
+      </div>
       <div className="graph-selector">
         <label htmlFor="graphType">Select Graph Type: </label>
         <select id="graphType" value={selectedGraph} onChange={handleGraphChange}>

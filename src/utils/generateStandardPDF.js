@@ -46,7 +46,7 @@ const generateStandardPDF = (invoice) => {
     const rows = invoice.products.map(product => [
       product.name,
       product.quantity,
-      Array.isArray(product.serialNumbers) ? product.serialNumbers.join(', ') : 'N/A',
+      Array.isArray(product.serialNumbers) ? product.serialNumbers.join('\n') : 'N/A',
       product.unitPrice !== undefined ? `$${product.unitPrice.toFixed(2)}` : 'N/A'
     ]);
 
@@ -57,7 +57,7 @@ const generateStandardPDF = (invoice) => {
     ]);
     rows.push([
       { content: 'Discount', colSpan: 3, styles: { halign: 'right' } },
-      invoice.discountType === 'percent' ? `${invoice.discountValue}%` : `$${invoice.discountValue.toFixed(2)}`
+      invoice.discountType === 'percent' ? `${invoice.discountValue}%` : `$${(invoice.discountValue || 0).toFixed(2)}`
     ]);
     rows.push([
       { content: 'Total Price', colSpan: 3, styles: { halign: 'right' } },
@@ -114,7 +114,7 @@ const generatePDFWithoutLogo = (doc, invoice) => {
   const rows = invoice.products.map(product => [
     product.name,
     product.quantity,
-    Array.isArray(product.serialNumbers) ? product.serialNumbers.join(', ') : 'N/A',
+    Array.isArray(product.serialNumbers) ? product.serialNumbers.join('\n') : 'N/A',
     product.unitPrice !== undefined ? `$${product.unitPrice.toFixed(2)}` : 'N/A'
   ]);
 
@@ -125,7 +125,7 @@ const generatePDFWithoutLogo = (doc, invoice) => {
   ]);
   rows.push([
     { content: 'Discount', colSpan: 3, styles: { halign: 'right' } },
-    invoice.discountType === 'percent' ? `${invoice.discountValue}%` : `$${invoice.discountValue.toFixed(2)}`
+    invoice.discountType === 'percent' ? `${invoice.discountValue}%` : `$${(invoice.discountValue || 0).toFixed(2)}`
   ]);
   rows.push([
     { content: 'Total Price', colSpan: 3, styles: { halign: 'right' } },
