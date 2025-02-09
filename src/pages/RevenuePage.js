@@ -12,19 +12,18 @@ const RevenuePage = () => {
   const [selectedGraph, setSelectedGraph] = useState('weekly');
   const [graphData, setGraphData] = useState({ labels: [], totalData: [], grossData: [], taxData: [] });
 
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [rangeTotalRevenue, setRangeTotalRevenue] = useState(0);
+  const [rangeTotalTaxRevenue, setRangeTotalTaxRevenue] = useState(0);
+  const [rangeGrossProfit, setRangeGrossProfit] = useState(0);
+
   useEffect(() => {
     const calculateRevenue = () => {
-      const now = new Date();
-      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const startOfQuarter = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
-      const startOfYear = new Date(now.getFullYear(), 0, 1);
-
       let total = 0;
       let totalTax = 0;
 
       invoices.forEach(invoice => {
-        const invoiceDate = new Date(invoice.date);
         const invoiceTotal = invoice.totalPrice || 0;
         const taxAmount = (invoice.tax / 100) * invoiceTotal;
 
@@ -148,6 +147,36 @@ const RevenuePage = () => {
     setSelectedGraph(e.target.value);
   };
 
+  const handleDateChange = () => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    let total = 0;
+    let totalTax = 0;
+
+    invoices.forEach(invoice => {
+      const invoiceDate = new Date(invoice.date);
+      if (invoiceDate >= start && invoiceDate <= end) {
+        const invoiceTotal = invoice.totalPrice || 0;
+        const taxAmount = (invoice.tax / 100) * invoiceTotal;
+
+        total += invoiceTotal;
+        totalTax += taxAmount;
+      }
+    });
+
+    setRangeTotalRevenue(total);
+    setRangeTotalTaxRevenue(totalTax);
+    setRangeGrossProfit(total - totalTax);
+  };
+
+  const handleReset = () => {
+    setStartDate('');
+    setEndDate('');
+    setRangeTotalRevenue(0);
+    setRangeTotalTaxRevenue(0);
+    setRangeGrossProfit(0);
+  };
+
   const formatNumber = (number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(number);
   };
@@ -155,10 +184,24 @@ const RevenuePage = () => {
   return (
     <div className="revenue-page">
       <div className="highlight-container">
-        <button className="highlight">Revenue Statistics</button>
+        <button className="highlight">All Time Revenue Statistics</button>
         <button className="highlight">Total Revenue: {formatNumber(totalRevenue)}</button>
         <button className="highlight">Total Tax Revenue: {formatNumber(totalTaxRevenue)}</button>
         <button className="highlight">Gross Profit: {formatNumber(grossProfit)}</button>
+      </div>
+      <div className="date-range-container">
+        <label htmlFor="startDate">Start Date: </label>
+        <input type="date" id="startDate" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <label htmlFor="endDate">End Date: </label>
+        <input type="date" id="endDate" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        <button onClick={handleDateChange} className="highlight">Calculate</button>
+        <button onClick={handleReset} className="highlight">Reset</button>
+      </div>
+      <div className="highlight-container">
+        <button className="highlight">Revenue from {startDate} to {endDate}</button>
+        <button className="highlight">Total Revenue: {formatNumber(rangeTotalRevenue)}</button>
+        <button className="highlight">Total Tax Revenue: {formatNumber(rangeTotalTaxRevenue)}</button>
+        <button className="highlight">Gross Profit: {formatNumber(rangeGrossProfit)}</button>
       </div>
       <div className="graph-selector">
         <label htmlFor="graphType">Select Graph Type: </label>

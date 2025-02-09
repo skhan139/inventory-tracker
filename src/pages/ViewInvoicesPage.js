@@ -1,4 +1,3 @@
-// src/pages/ViewInvoicesPage.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
@@ -14,6 +13,8 @@ const ViewInvoicesPage = () => {
   const [invoiceToDelete, setInvoiceToDelete] = useState(null);
   const [viewingType, setViewingType] = useState(null); // null, 'standard', 'allegheny'
   const [fulfilledOrders, setFulfilledOrders] = useState({}); // State to track fulfilled orders
+  const [currentPage, setCurrentPage] = useState(1); // State to track the current page
+  const invoicesPerPage = 5; // Number of invoices per page
 
   const navigate = useNavigate();
   const db = getFirestore();
@@ -39,6 +40,11 @@ const ViewInvoicesPage = () => {
       fetchFulfillmentStatus();
     }
   }, [invoices, db]);
+
+  useEffect(() => {
+    // Re-fetch or update the invoices when the invoices context changes
+    setCurrentPage(1); // Reset to the first page when invoices change
+  }, [invoices]);
 
   const handleEdit = (id) => {
     navigate(`/edit-invoice/${id}`);
@@ -91,9 +97,22 @@ const ViewInvoicesPage = () => {
   const sortedInvoices = filteredInvoices.sort((a, b) => new Date(b.date) - new Date(a.date));
   const sortedAlleghenyCountyInvoices = filteredAlleghenyCountyInvoices.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+  // Pagination logic
+  const indexOfLastInvoice = currentPage * invoicesPerPage;
+  const indexOfFirstInvoice = indexOfLastInvoice - invoicesPerPage;
+  const currentInvoices = viewingType === 'standard' ? sortedInvoices.slice(indexOfFirstInvoice, indexOfLastInvoice) : sortedAlleghenyCountyInvoices.slice(indexOfFirstInvoice, indexOfLastInvoice);
+
+  const totalPages = Math.ceil((viewingType === 'standard' ? sortedInvoices.length : sortedAlleghenyCountyInvoices.length) / invoicesPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <div className="view-invoices-page">
-      <h1 className='invoice'>View Previous Invoices</h1>
+      <button className="invoice-button-wrapper">
+        <h1 className='invoice'>View Previous Invoices</h1>
+      </button>
       {viewingType === null ? (
         <div className="button-container">
           <button onClick={() => setViewingType('standard')} className="invoice-button">View Standard Invoices</button>
@@ -119,7 +138,7 @@ const ViewInvoicesPage = () => {
             <p>No Allegheny County invoices available.</p>
           )}
           <ul>
-            {(viewingType === 'standard' ? sortedInvoices : sortedAlleghenyCountyInvoices).map((invoice, index) => (
+            {currentInvoices.map((invoice, index) => (
               <li key={invoice.id} className="invoice-item">
                 <button className="delete-invoice" onClick={() => handleDelete(invoice.id)}>X</button>
                 <div className="invoice-header">
@@ -149,20 +168,31 @@ const ViewInvoicesPage = () => {
                 </div>
                 <p>Tax: {invoice.tax}%</p>
                 <p>Discount: {invoice.discountType === 'percent' ? `${invoice.discountValue}%` : `$${invoice.discountValue !== undefined ? invoice.discountValue.toFixed(2) : 'N/A'}`}</p>
-<p>Total Price: ${invoice.totalPrice !== undefined ? invoice.totalPrice.toFixed(2) : 'N/A'}</p>
-<div className="order-fulfilled">
-  <label>
-    <input
-      type="checkbox"
-      checked={fulfilledOrders[invoice.id] || false}
-      onChange={() => handleCheckboxChange(invoice.id)}
-    />
-    Order Fulfilled?
-  </label>
-</div>
+                <p>Total Price: ${invoice.totalPrice !== undefined ? invoice.totalPrice.toFixed(2) : 'N/A'}</p>
+                <div className="order-fulfilled">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={fulfilledOrders[invoice.id] || false}
+                      onChange={() => handleCheckboxChange(invoice.id)}
+                    />
+                    Order Fulfilled?
+                  </label>
+                </div>
               </li>
             ))}
           </ul>
+          <div className="pagination">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                className={`page-button ${currentPage === index + 1 ? 'active' : ''}`}
+                onClick={() => handlePageChange(index + 1)}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
         </>
       )}
 
