@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
 import './CustomersPage.css';
 
@@ -10,6 +11,7 @@ const CustomersPage = () => {
   const [editingPhoneNumber, setEditingPhoneNumber] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchInvoices();
@@ -143,7 +145,7 @@ const CustomersPage = () => {
                         </ul>
                       </div>
                       <div className="invoice-actions">
-                        <button>Edit</button>
+                        <button onClick={() => navigate(`/edit-invoice/${invoice.id}`)}>Edit</button>
                         <button>Download PDF</button>
                       </div>
                       <p>Tax: {invoice.tax}%</p>
