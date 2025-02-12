@@ -83,6 +83,7 @@
   border: 1px solid #dee2e6;
   border-radius: 5px;
   margin-bottom: 10px;
+  background-color: white; /* Set background color to white */
   animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
 }
 

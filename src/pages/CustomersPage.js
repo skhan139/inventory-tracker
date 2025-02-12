@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInvoices } from '../context/InvoicesContext';
+import generateStandardPDF from '../utils/generateStandardPDF';
+import generateAlleghenyPDF from '../utils/generateAlleghenyPDF';
 import './CustomersPage.css';
 
 const CustomersPage = () => {
@@ -71,6 +73,23 @@ const CustomersPage = () => {
   const customerInvoices = selectedCustomer
     ? allInvoices.filter(invoice => invoice.customerName === selectedCustomer)
     : [];
+
+  // Determine invoice type for PDF generation
+  const determineInvoiceType = (invoice) => {
+    return alleghenyCountyInvoices.find(alleghenyInvoice => alleghenyInvoice.id === invoice.id)
+      ? 'allegheny'
+      : 'standard';
+  };
+
+  // Handle downloading PDF
+  const handleDownloadPDF = (invoice) => {
+    const invoiceType = determineInvoiceType(invoice);
+    if (invoiceType === 'standard') {
+      generateStandardPDF(invoice);
+    } else if (invoiceType === 'allegheny') {
+      generateAlleghenyPDF(invoice);
+    }
+  };
 
   return (
     <div className="customers-page">
@@ -146,7 +165,7 @@ const CustomersPage = () => {
                       </div>
                       <div className="invoice-actions">
                         <button onClick={() => navigate(`/edit-invoice/${invoice.id}`)}>Edit</button>
-                        <button>Download PDF</button>
+                        <button onClick={() => handleDownloadPDF(invoice)}>Download PDF</button>
                       </div>
                       <p>Tax: {invoice.tax}%</p>
                       <p>Total Price: ${invoice.totalPrice !== undefined ? invoice.totalPrice.toFixed(2) : 'N/A'}</p>

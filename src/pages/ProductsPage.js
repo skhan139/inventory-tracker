@@ -72,6 +72,11 @@ const ProductsPage = () => {
   };
 
   const handleAddProduct = async (newProduct, location) => {
+    if (!newProduct.name) {
+      alert('Product name is required');
+      return;
+    }
+
     const docRef = await addDoc(collection(db, 'products'), {
       ...newProduct,
       quantities: {
@@ -90,6 +95,11 @@ const ProductsPage = () => {
   };
 
   const handleConfirmAddProductToStorage = async (product, quantity, storageLocation) => {
+    if (!product.name) {
+      alert('Product name is required');
+      return;
+    }
+
     const updatedProducts = products.map(p =>
       p.id === product.id ? { ...p, quantities: { ...p.quantities, [storageLocation]: (p.quantities[storageLocation] || 0) + parseInt(quantity) } } : p
     );
@@ -208,12 +218,6 @@ const ProductsPage = () => {
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Filter out duplicate products based on name
-  const uniqueProducts = Array.from(new Set(filteredProducts.map(product => product.name)))
-    .map(name => {
-      return filteredProducts.find(product => product.name === name);
-    });
-
   return (
     <div className="products-page">
       <button className="show-form-button" onClick={() => setIsProductFormVisible(!isProductFormVisible)}>
@@ -232,7 +236,7 @@ const ProductsPage = () => {
         </button>
         {kmStorageVisible && (
           <ProductList
-            products={uniqueProducts.filter(product => product.quantities.kmStorage > 0).map(product => ({ ...product, quantity: product.quantities.kmStorage }))}
+            products={filteredProducts.filter(product => product.quantities.kmStorage > 0).map(product => ({ ...product, quantity: product.quantities.kmStorage }))}
             onIncrease={(id) => handleIncrease(id, 'kmStorage')}
             onDecrease={(id) => handleDecrease(id, 'kmStorage')}
             onDelete={(id) => handleDeleteProduct(id, 'kmStorage')}
@@ -249,7 +253,7 @@ const ProductsPage = () => {
         </button>
         {keyserStorageVisible && (
           <ProductList
-            products={uniqueProducts.filter(product => product.quantities.keyserStorage > 0).map(product => ({ ...product, quantity: product.quantities.keyserStorage }))}
+            products={filteredProducts.filter(product => product.quantities.keyserStorage > 0).map(product => ({ ...product, quantity: product.quantities.keyserStorage }))}
             onIncrease={(id) => handleIncrease(id, 'keyserStorage')}
             onDecrease={(id) => handleDecrease(id, 'keyserStorage')}
             onDelete={(id) => handleDeleteProduct(id, 'keyserStorage')}
@@ -266,7 +270,7 @@ const ProductsPage = () => {
         </button>
         {gfcStorageVisible && (
           <ProductList
-            products={uniqueProducts.filter(product => product.quantities.gfcCumberlandStorage > 0).map(product => ({ ...product, quantity: product.quantities.gfcCumberlandStorage }))}
+            products={filteredProducts.filter(product => product.quantities.gfcCumberlandStorage > 0).map(product => ({ ...product, quantity: product.quantities.gfcCumberlandStorage }))}
             onIncrease={(id) => handleIncrease(id, 'gfcCumberlandStorage')}
             onDecrease={(id) => handleDecrease(id, 'gfcCumberlandStorage')}
             onDelete={(id) => handleDeleteProduct(id, 'gfcCumberlandStorage')}
