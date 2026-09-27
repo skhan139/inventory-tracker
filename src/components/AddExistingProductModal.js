@@ -5,8 +5,9 @@ const AddExistingProductModal = ({ products, onClose, onAdd, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [productToDelete, setProductToDelete] = useState(null);
 
+  // Filter products to include only those that match the search term exactly and have a valid name
   const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    product.name && product.name.toLowerCase() === searchTerm.toLowerCase()
   );
 
   const handleDelete = async () => {

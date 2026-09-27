@@ -1,71 +1,428 @@
-html, body {
-  height: 100%;
-  margin: 0;
-}
+/* SelectInvoiceTypePage.css */
 
 .select-invoice-type-page {
-  padding: 20px;
-  text-align: center;
-  background-image: url(/src/assets/images/eggshellbg.jpg);
-  background-size: cover; /* Ensures the background image covers the entire element */
-  background-repeat: no-repeat; /* Prevents the background image from repeating */
-  background-position: center; /* Centers the background image */
-  min-height: 100vh; /* Ensures the element's height is at least 100% of the viewport height */
-  height: 100%; /* Ensures the element's height is 100% of the viewport height */
+  --page-bg: #080d18;
+  --surface: rgba(255, 255, 255, 0.97);
+  --surface-muted: rgba(255, 255, 255, 0.055);
+  --text: #172033;
+  --text-muted: #667085;
+  --light-muted: rgba(255, 255, 255, 0.62);
+  --border: rgba(255, 255, 255, 0.12);
+  --dark-border: #e2e6ec;
+  --accent: #d8a928;
+  --accent-hover: #e6ba42;
+  --accent-soft: rgba(216, 169, 40, 0.13);
+
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: clamp(48px, 7vw, 90px) clamp(18px, 5vw, 64px);
+  overflow: hidden;
+  color: white;
+  background:
+    linear-gradient(135deg, rgba(8, 13, 24, 0.96), rgba(15, 24, 40, 0.91)),
+    url('/src/assets/images/eggshellbg.jpg') center / cover fixed;
+  font-family:
+    Inter, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  isolation: isolate;
+}
+
+.select-invoice-type-page *,
+.select-invoice-type-page *::before,
+.select-invoice-type-page *::after {
   box-sizing: border-box;
 }
 
+.select-page-glow {
+  position: absolute;
+  z-index: -1;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(15px);
+}
+
+.select-page-glow--one {
+  top: -300px;
+  right: -80px;
+  background: rgba(216, 169, 40, 0.15);
+}
+
+.select-page-glow--two {
+  bottom: -330px;
+  left: -180px;
+  background: rgba(44, 91, 155, 0.18);
+}
+
+.invoice-type-hero,
+.rules-section {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+}
+
+.section-eyebrow {
+  margin: 0 0 13px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.invoice-type-hero > h1 {
+  max-width: 720px;
+  margin: 0;
+  font-size: clamp(2.35rem, 6vw, 4.7rem);
+  font-weight: 750;
+  letter-spacing: -0.055em;
+  line-height: 1.02;
+}
+
+.hero-description {
+  max-width: 600px;
+  margin: 22px 0 0;
+  color: var(--light-muted);
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  line-height: 1.7;
+}
+
+/* Invoice selection cards */
+
 .button-container {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
+  margin-top: 45px;
 }
 
-.invoice-type-button {
-  padding: 10px 20px;
-  background-color: #007bff;
+.invoice-type-card {
+  position: relative;
+  display: flex;
+  min-height: 280px;
+  padding: clamp(24px, 4vw, 34px);
+  overflow: hidden;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 22px;
   color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgba(216, 169, 40, 0.15),
+      transparent 14rem
+    ),
+    var(--surface-muted);
+  text-decoration: none;
+  backdrop-filter: blur(14px);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
-.invoice-type-button:hover {
-  background-color: #0056b3;
+.invoice-type-card:hover {
+  border-color: rgba(216, 169, 40, 0.45);
+  background-color: rgba(255, 255, 255, 0.085);
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.24);
+  transform: translateY(-5px);
 }
+
+.invoice-type-card:focus-visible {
+  outline: 3px solid rgba(216, 169, 40, 0.5);
+  outline-offset: 4px;
+}
+
+.invoice-type-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.invoice-type-number {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border-radius: 13px;
+  color: #18130a;
+  background: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.invoice-type-label {
+  padding: 7px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.invoice-type-card__content {
+  margin: 42px 0 35px;
+}
+
+.invoice-type-card__content h2 {
+  margin: 0 0 12px;
+  color: white;
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  letter-spacing: -0.025em;
+}
+
+.invoice-type-card__content p {
+  max-width: 440px;
+  margin: 0;
+  color: var(--light-muted);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.invoice-type-card__action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.invoice-type-arrow {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  color: #18130a;
+  background: var(--accent);
+  font-size: 1rem;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.invoice-type-card:hover .invoice-type-arrow {
+  background: var(--accent-hover);
+  transform: translateX(3px);
+}
+
+/* Rules area */
 
 .rules-section {
-  margin-top: 40px;
+  margin-top: clamp(70px, 10vw, 120px);
+  padding: clamp(25px, 5vw, 48px);
+  border-radius: 26px;
+  color: var(--text);
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgba(216, 169, 40, 0.09),
+      transparent 22rem
+    ),
+    var(--surface);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
 }
 
-.rules-section h1 {
-  margin-bottom: 20px;
+.rules-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 35px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.rules-heading h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.rules-heading > p {
+  max-width: 390px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 .rules-container {
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 30px;
   text-align: left;
 }
 
 .rule {
-  width: 30%;
+  width: auto;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--dark-border);
+  border-radius: 16px;
+  background: rgba(248, 249, 251, 0.82);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
-.rule h2 {
-  margin-bottom: 10px;
+.rule:hover {
+  border-color: rgba(216, 169, 40, 0.46);
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.07);
+  transform: translateY(-2px);
+}
+
+.rule__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.rule__icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 10px;
+  color: #17130a;
+  background: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.rule__tag {
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #765b11;
+  background: var(--accent-soft);
+  font-size: 0.65rem;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.rule h3 {
+  margin: 0 0 16px;
+  color: var(--text);
+  font-size: 1.08rem;
+  letter-spacing: -0.01em;
 }
 
 .rule ul {
-  list-style-type: disc;
-  padding-left: 20px;
+  display: grid;
+  gap: 11px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .rule li {
-  margin-bottom: 5px;
+  position: relative;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
 }
 
-.rule h2 {
-  color: black;
+.rule li::before {
+  position: absolute;
+  top: 0.62em;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  content: "";
+}
+
+.rules-disclaimer {
+  margin: 28px 0 0;
+  padding: 14px 16px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 9px 9px 0;
+  color: var(--text-muted);
+  background: var(--accent-soft);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+/* Responsive layout */
+
+@media (max-width: 760px) {
+  .select-invoice-type-page {
+    padding: 42px 16px;
+  }
+
+  .button-container,
+  .rules-container {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-type-card {
+    min-height: 250px;
+  }
+
+  .rules-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .rules-heading > p {
+    max-width: none;
+  }
+}
+
+@media (max-width: 440px) {
+  .invoice-type-hero > h1 {
+    font-size: 2.25rem;
+  }
+
+  .button-container {
+    margin-top: 32px;
+  }
+
+  .invoice-type-card {
+    min-height: 230px;
+    padding: 22px;
+    border-radius: 18px;
+  }
+
+  .invoice-type-card__content {
+    margin: 32px 0 28px;
+  }
+
+  .rules-section {
+    margin-top: 60px;
+    padding: 22px 16px;
+    border-radius: 20px;
+  }
+
+  .rule {
+    padding: 20px 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select-invoice-type-page *,
+  .select-invoice-type-page *::before,
+  .select-invoice-type-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
