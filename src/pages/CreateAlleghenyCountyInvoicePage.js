@@ -1,306 +1,512 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { db } from '../firebase'; // Ensure this is the correct path to your firebase config
-import { collection, addDoc } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 import './CreateAlleghenyCountyInvoicePage.css';
 
+const OPERATOR_TYPES = {
+  FOR_PROFIT: 'for-profit',
+  QUALIFIED_ORGANIZATION: 'qualified-organization',
+};
+
+const TAX_RATES = {
+  [OPERATOR_TYPES.FOR_PROFIT]: 40,
+  [OPERATOR_TYPES.QUALIFIED_ORGANIZATION]: 10,
+};
+
+const createRowId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+const getLocalDate = () => {
+  const today = new Date();
+  const offset = today.getTimezoneOffset() * 60_000;
+  return new Date(today.getTime() - offset).toISOString().slice(0, 10);
+};
+
+const createEmptyPacket = () => ({
+  id: createRowId(),
+  name: '',
+  manufacturer: '',
+  stickerNumber: '',
+  serialNumber: '',
+  grossProfit: '',
+  productPrice: '',
+});
+
+const createInitialFormData = () => ({
+  invoiceNumber: '',
+  date: getLocalDate(),
+  wholesalerName: '',
+  wholesalerLicenseNumber: '',
+  customerName: '',
+  operatorLicenseNumber: '',
+  customerLocation: '',
+  operatorType: OPERATOR_TYPES.FOR_PROFIT,
+  products: [createEmptyPacket()],
+  notes: '',
+});
+
+const toAmount = (value) => {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : 0;
+};
+
+const roundCurrency = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(toAmount(value));
+
 const CreateAlleghenyCountyInvoicePage = () => {
-  const [formData, setFormData] = useState({
-    customerName: '',
-    date: new Date().toISOString().substr(0, 10),
-    customerLocation: '',
-    products: [{
-      id: Date.now(),
-      name: '',
-      quantity: 1,
-      stickerNumber: '',
-      serialNumber: '',
-      grossProfit: 0,
-      productPrice: 0,
-      taxableProfit: 0
-    }],
-    salesTax: 0,
-    subTotal: 0,
-    total: 0,
-  });
+  const [formData, setFormData] = useState(createInitialFormData);
+  const [submitStatus, setSubmitStatus] = useState('idle');
+  const [message, setMessage] = useState('');
 
-  const [totals, setTotals] = useState({ grossProfit: 0, productPrice: 0, taxableProfit: 0 });
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const taxRate = TAX_RATES[formData.operatorType];
 
-  useEffect(() => {
-    const subTotal = formData.products.reduce((acc, product) => acc + product.quantity * product.productPrice, 0);
-    const salesTax = isNaN(parseFloat(formData.salesTax)) ? 0 : parseFloat(formData.salesTax);
-    const total = subTotal + (subTotal * salesTax / 100);
-    setFormData(prevData => ({ ...prevData, subTotal, total }));
+  const totals = useMemo(() => {
+    const productPrice = formData.products.reduce(
+      (sum, packet) => sum + toAmount(packet.productPrice),
+      0,
+    );
+    const grossProfit = formData.products.reduce(
+      (sum, packet) => sum + toAmount(packet.grossProfit),
+      0,
+    );
+    const gamingTax = grossProfit * (taxRate / 100);
 
-    const grossProfitTotal = formData.products.reduce((acc, product) => acc + product.grossProfit * product.quantity, 0);
-    const productPriceTotal = formData.products.reduce((acc, product) => acc + product.productPrice * product.quantity, 0);
-    const taxableProfitTotal = formData.products.reduce((acc, product) => acc + product.taxableProfit * product.quantity, 0);
-    setTotals({ grossProfit: grossProfitTotal, productPrice: productPriceTotal, taxableProfit: taxableProfitTotal });
-  }, [formData.products, formData.salesTax]);
+    return {
+      productPrice: roundCurrency(productPrice),
+      grossProfit: roundCurrency(grossProfit),
+      gamingTax: roundCurrency(gamingTax),
+      totalDue: roundCurrency(productPrice + gamingTax),
+    };
+  }, [formData.products, taxRate]);
 
-  const handleProductChange = (index, field, value) => {
-    const newProducts = [...formData.products];
-    newProducts[index][field] = value;
-    if (field === 'quantity') {
-      const existingProduct = newProducts[index];
-      const additionalQuantity = parseInt(value) - 1;
-      if (additionalQuantity >= 0) {
-        const additionalProducts = Array.from({ length: additionalQuantity }, (_, i) => ({
-          ...existingProduct,
-          id: Date.now() + i,
-          quantity: 1,
-          stickerNumber: newProducts[index + i + 1]?.stickerNumber || '',
-          serialNumber: newProducts[index + i + 1]?.serialNumber || ''
-        }));
-        newProducts.splice(index + 1, newProducts.length - index - 1, ...additionalProducts);
-      }
-    }
-    setFormData(prevData => ({ ...prevData, products: newProducts }));
-  };
-
-  const handleAddProduct = () => {
-    setFormData(prevData => ({
-      ...prevData,
-      products: [...prevData.products, {
-        id: Date.now(),
-        name: '',
-        quantity: 1,
-        stickerNumber: '',
-        serialNumber: '',
-        grossProfit: 0,
-        productPrice: 0,
-        taxableProfit: 0
-      }]
+  const handleChange = ({ target: { name, value } }) => {
+    setFormData((currentData) => ({
+      ...currentData,
+      [name]: value,
     }));
   };
 
-  const handleDeleteProduct = (index) => {
-    const newProducts = formData.products.filter((_, i) => i !== index);
-    setFormData(prevData => ({ ...prevData, products: newProducts }));
+  const handlePacketChange = (packetId, field, value) => {
+    setFormData((currentData) => ({
+      ...currentData,
+      products: currentData.products.map((packet) =>
+        packet.id === packetId ? { ...packet, [field]: value } : packet,
+      ),
+    }));
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevData => ({ ...prevData, [name]: value }));
+  const handleAddPacket = () => {
+    setFormData((currentData) => ({
+      ...currentData,
+      products: [...currentData.products, createEmptyPacket()],
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleDeletePacket = (packetId) => {
+    setFormData((currentData) => ({
+      ...currentData,
+      products: currentData.products.filter((packet) => packet.id !== packetId),
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSubmitStatus('submitting');
+    setMessage('');
+
+    const normalizedStickerNumbers = formData.products.map((packet) =>
+      packet.stickerNumber.trim().toLocaleUpperCase(),
+    );
+    const normalizedSerialNumbers = formData.products.map((packet) =>
+      packet.serialNumber.trim().toLocaleUpperCase(),
+    );
+    const hasDuplicateSticker =
+      new Set(normalizedStickerNumbers).size !== normalizedStickerNumbers.length;
+    const hasDuplicateSerial =
+      new Set(normalizedSerialNumbers).size !== normalizedSerialNumbers.length;
+
+    if (hasDuplicateSticker || hasDuplicateSerial) {
+      setSubmitStatus('error');
+      setMessage(
+        'Each packet must have a unique county sticker number and packet serial number.',
+      );
+      return;
+    }
+
+    const normalizedProducts = formData.products.map((packet) => {
+      const grossProfit = roundCurrency(toAmount(packet.grossProfit));
+      const gamingTax = roundCurrency(grossProfit * (taxRate / 100));
+
+      return {
+        ...packet,
+        quantity: 1,
+        grossProfit,
+        productPrice: roundCurrency(toAmount(packet.productPrice)),
+        gamingTax,
+        // Retained for compatibility with older invoice/PDF code.
+        taxableProfit: gamingTax,
+      };
+    });
+
+    const invoice = {
+      ...formData,
+      products: normalizedProducts,
+      taxRate,
+      gamingTaxRate: taxRate,
+      totalGrossProfit: totals.grossProfit,
+      subTotal: totals.productPrice,
+      totalGamingTax: totals.gamingTax,
+      total: totals.totalDue,
+      // Retained for compatibility; this represents gaming tax, not sales tax.
+      salesTax: taxRate,
+      createdAt: serverTimestamp(),
+      reportingJurisdiction: 'Allegany County, Maryland',
+    };
+
     try {
-      // Add the invoice to the alleghenyInvoices collection
-      await addDoc(collection(db, 'alleghenyInvoices'), formData);
-      console.log('Invoice added to Firestore:', formData);
-
-      // Show success message
-      setShowSuccessMessage(true);
-
-      // Clear form fields
-      setFormData({
-        customerName: '',
-        date: new Date().toISOString().substr(0, 10),
-        customerLocation: '',
-        products: [{
-          id: Date.now(),
-          name: '',
-          quantity: 1,
-          stickerNumber: '',
-          serialNumber: '',
-          grossProfit: 0,
-          productPrice: 0,
-          taxableProfit: 0
-        }],
-        salesTax: 0,
-        subTotal: 0,
-        total: 0,
-      });
-
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-      }, 3000);
+      await addDoc(collection(db, 'alleghenyInvoices'), invoice);
+      setFormData(createInitialFormData());
+      setSubmitStatus('success');
+      setMessage('Paper gaming invoice created successfully.');
     } catch (error) {
-      console.error('Error adding document: ', error);
+      console.error('Unable to create paper gaming invoice:', error);
+      setSubmitStatus('error');
+      setMessage('The invoice could not be saved. Please review it and try again.');
     }
   };
 
   return (
-    <div className="create-allegheny-county-invoice-page">
-      <h1>Create Allegheny Invoice</h1>
+    <main className="create-allegheny-county-invoice-page">
+      <header className="page-header">
+        <p className="eyebrow">Allegany County paper gaming</p>
+        <h1>Create Gaming Invoice</h1>
+        <p className="page-introduction">
+          Record each paper gaming packet separately so its county sticker and
+          manufacturer serial number remain traceable.
+        </p>
+      </header>
+
       <form onSubmit={handleSubmit} className="invoice-form">
-        {showSuccessMessage && <div className="success-message">Invoice created successfully</div>}
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="customerName">Customer Name</label>
-            <input
-              type="text"
-              id="customerName"
-              name="customerName"
-              value={formData.customerName}
-              onChange={handleChange}
-              required
-            />
+        {message && (
+          <div
+            className={submitStatus === 'error' ? 'error-message' : 'success-message'}
+            role={submitStatus === 'error' ? 'alert' : 'status'}
+          >
+            {message}
           </div>
-          <div className="form-group">
-            <label htmlFor="date">Date</label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-            />
+        )}
+
+        <section className="form-section" aria-labelledby="invoice-details-heading">
+          <div className="section-heading">
+            <span>01</span>
+            <div>
+              <h2 id="invoice-details-heading">Invoice details</h2>
+              <p>Identify the transaction and licensed parties.</p>
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="customerLocation">Customer Location</label>
-            <input
-              type="text"
-              id="customerLocation"
-              name="customerLocation"
-              value={formData.customerLocation}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-        {formData.products.map((product, index) => (
-          <div key={product.id} className="form-row product-group">
+
+          <div className="form-grid">
             <div className="form-group">
-              <label htmlFor={`product-${index}`}>Product</label>
+              <label htmlFor="invoiceNumber">Invoice number</label>
               <input
+                id="invoiceNumber"
+                name="invoiceNumber"
                 type="text"
-                id={`product-${index}`}
-                name="name"
-                value={product.name}
-                onChange={(e) => handleProductChange(index, 'name', e.target.value)}
+                value={formData.invoiceNumber}
+                onChange={handleChange}
+                autoComplete="off"
                 required
               />
             </div>
+
             <div className="form-group">
-              <label>Quantity</label>
+              <label htmlFor="date">Sale date</label>
               <input
-                type="number"
-                id={`quantity-${index}`}
-                name="quantity"
-                value={product.quantity}
-                onChange={(e) => handleProductChange(index, 'quantity', parseInt(e.target.value))}
+                id="date"
+                name="date"
+                type="date"
+                value={formData.date}
+                onChange={handleChange}
                 required
-                min="1"
               />
             </div>
+
             <div className="form-group">
-              <label htmlFor={`stickerNumber-${index}`}>Sticker Number</label>
+              <label htmlFor="wholesalerName">Wholesaler licensee name</label>
               <input
+                id="wholesalerName"
+                name="wholesalerName"
                 type="text"
-                id={`stickerNumber-${index}`}
-                name="stickerNumber"
-                value={product.stickerNumber}
-                onChange={(e) => handleProductChange(index, 'stickerNumber', e.target.value)}
+                value={formData.wholesalerName}
+                onChange={handleChange}
                 required
               />
             </div>
+
             <div className="form-group">
-              <label htmlFor={`serialNumber-${index}`}>Serial Number</label>
+              <label htmlFor="wholesalerLicenseNumber">Wholesaler license number</label>
               <input
+                id="wholesalerLicenseNumber"
+                name="wholesalerLicenseNumber"
                 type="text"
-                id={`serialNumber-${index}`}
-                name="serialNumber"
-                value={product.serialNumber}
-                onChange={(e) => handleProductChange(index, 'serialNumber', e.target.value)}
+                value={formData.wholesalerLicenseNumber}
+                onChange={handleChange}
                 required
               />
             </div>
+
             <div className="form-group">
-              <label htmlFor={`grossProfit-${index}`}>Gross Profit</label>
+              <label htmlFor="customerName">Paper gaming operator name</label>
               <input
-                type="number"
-                id={`grossProfit-${index}`}
-                name="grossProfit"
-                value={isNaN(product.grossProfit) ? '' : product.grossProfit}
-                onChange={(e) => handleProductChange(index, 'grossProfit', parseFloat(e.target.value))}
+                id="customerName"
+                name="customerName"
+                type="text"
+                value={formData.customerName}
+                onChange={handleChange}
                 required
               />
             </div>
+
             <div className="form-group">
-              <label htmlFor={`productPrice-${index}`}>Product Price</label>
+              <label htmlFor="operatorLicenseNumber">Operator license number</label>
               <input
-                type="number"
-                id={`productPrice-${index}`}
-                name="productPrice"
-                value={isNaN(product.productPrice) ? '' : product.productPrice}
-                onChange={(e) => handleProductChange(index, 'productPrice', parseFloat(e.target.value))}
+                id="operatorLicenseNumber"
+                name="operatorLicenseNumber"
+                type="text"
+                value={formData.operatorLicenseNumber}
+                onChange={handleChange}
                 required
               />
             </div>
-            <div className="form-group">
-              <label htmlFor={`taxableProfit-${index}`}>Taxable Profit</label>
+
+            <div className="form-group form-group-wide">
+              <label htmlFor="customerLocation">Licensed premises / operator address</label>
               <input
-                type="number"
-                id={`taxableProfit-${index}`}
-                name="taxableProfit"
-                value={isNaN(product.taxableProfit) ? '' : product.taxableProfit}
-                onChange={(e) => handleProductChange(index, 'taxableProfit', parseFloat(e.target.value))}
+                id="customerLocation"
+                name="customerLocation"
+                type="text"
+                value={formData.customerLocation}
+                onChange={handleChange}
                 required
               />
             </div>
-            <button type="button" className="delete-product" onClick={() => handleDeleteProduct(index)}>Delete</button>
+
+            <div className="form-group form-group-wide">
+              <label htmlFor="operatorType">Operator classification</label>
+              <select
+                id="operatorType"
+                name="operatorType"
+                value={formData.operatorType}
+                onChange={handleChange}
+                required
+              >
+                <option value={OPERATOR_TYPES.FOR_PROFIT}>
+                  For-profit business — 40% gaming tax
+                </option>
+                <option value={OPERATOR_TYPES.QUALIFIED_ORGANIZATION}>
+                  Qualified organization — 10% gaming tax
+                </option>
+              </select>
+            </div>
           </div>
-        ))}
-        <div className="form-row totals-row">
-          <div className="form-group">
-            <label>Total Gross Profit</label>
-            <input type="number" value={totals.grossProfit} readOnly />
+        </section>
+
+        <section className="form-section" aria-labelledby="packets-heading">
+          <div className="section-heading section-heading-with-action">
+            <span>02</span>
+            <div>
+              <h2 id="packets-heading">Paper gaming packets</h2>
+              <p>Use one row per packet; sticker and packet serial numbers must be unique.</p>
+            </div>
+            <button type="button" className="add-product" onClick={handleAddPacket}>
+              Add packet
+            </button>
           </div>
-          <div className="form-group">
-            <label>Total Product Price</label>
-            <input type="number" value={totals.productPrice} readOnly />
+
+          <div className="packet-list">
+            {formData.products.map((packet, index) => (
+              <fieldset key={packet.id} className="product-group">
+                <legend>Packet {index + 1}</legend>
+
+                <div className="form-grid packet-grid">
+                  <div className="form-group">
+                    <label htmlFor={`name-${packet.id}`}>Game description</label>
+                    <input
+                      id={`name-${packet.id}`}
+                      type="text"
+                      value={packet.name}
+                      onChange={(event) =>
+                        handlePacketChange(packet.id, 'name', event.target.value)
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor={`manufacturer-${packet.id}`}>Manufacturer</label>
+                    <input
+                      id={`manufacturer-${packet.id}`}
+                      type="text"
+                      value={packet.manufacturer}
+                      onChange={(event) =>
+                        handlePacketChange(packet.id, 'manufacturer', event.target.value)
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor={`sticker-${packet.id}`}>County gaming sticker number</label>
+                    <input
+                      id={`sticker-${packet.id}`}
+                      type="text"
+                      value={packet.stickerNumber}
+                      onChange={(event) =>
+                        handlePacketChange(packet.id, 'stickerNumber', event.target.value)
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor={`serial-${packet.id}`}>Packet serial number</label>
+                    <input
+                      id={`serial-${packet.id}`}
+                      type="text"
+                      value={packet.serialNumber}
+                      onChange={(event) =>
+                        handlePacketChange(packet.id, 'serialNumber', event.target.value)
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor={`gross-profit-${packet.id}`}>Gross profit</label>
+                    <div className="currency-input">
+                      <span>$</span>
+                      <input
+                        id={`gross-profit-${packet.id}`}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        inputMode="decimal"
+                        value={packet.grossProfit}
+                        onChange={(event) =>
+                          handlePacketChange(packet.id, 'grossProfit', event.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor={`price-${packet.id}`}>Packet sale price</label>
+                    <div className="currency-input">
+                      <span>$</span>
+                      <input
+                        id={`price-${packet.id}`}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        inputMode="decimal"
+                        value={packet.productPrice}
+                        onChange={(event) =>
+                          handlePacketChange(packet.id, 'productPrice', event.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="packet-summary">
+                  Gaming tax for this packet: {' '}
+                  <strong>
+                    {formatCurrency(toAmount(packet.grossProfit) * (taxRate / 100))}
+                  </strong>
+                </div>
+
+                {formData.products.length > 1 && (
+                  <button
+                    type="button"
+                    className="delete-product"
+                    onClick={() => handleDeletePacket(packet.id)}
+                    aria-label={`Delete packet ${index + 1}`}
+                  >
+                    Delete packet
+                  </button>
+                )}
+              </fieldset>
+            ))}
           </div>
-          <div className="form-group">
-            <label>Total Taxable Profit</label>
-            <input type="number" value={totals.taxableProfit} readOnly />
+        </section>
+
+        <section className="form-section totals-section" aria-labelledby="totals-heading">
+          <div className="section-heading">
+            <span>03</span>
+            <div>
+              <h2 id="totals-heading">Invoice totals</h2>
+              <p>Gaming tax is calculated from gross profit, not the packet sale price.</p>
+            </div>
           </div>
-        </div>
-        <button type="button" onClick={handleAddProduct}>Add Another Product</button>
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="salesTax">Sales Tax (%)</label>
-            <input
-              type="number"
-              id="salesTax"
-              name="salesTax"
-              value={isNaN(formData.salesTax) ? '' : formData.salesTax}
+
+          <dl className="totals-grid">
+            <div>
+              <dt>Packet subtotal</dt>
+              <dd>{formatCurrency(totals.productPrice)}</dd>
+            </div>
+            <div>
+              <dt>Total gross profit</dt>
+              <dd>{formatCurrency(totals.grossProfit)}</dd>
+            </div>
+            <div>
+              <dt>Gaming tax ({taxRate}%)</dt>
+              <dd>{formatCurrency(totals.gamingTax)}</dd>
+            </div>
+            <div className="grand-total">
+              <dt>Total amount due</dt>
+              <dd>{formatCurrency(totals.totalDue)}</dd>
+            </div>
+          </dl>
+
+          <div className="form-group notes-group">
+            <label htmlFor="notes">Notes</label>
+            <textarea
+              id="notes"
+              name="notes"
+              rows="4"
+              value={formData.notes}
               onChange={handleChange}
-              required
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="subTotal">Sub Total</label>
-            <input
-              type="number"
-              id="subTotal"
-              name="subTotal"
-              value={isNaN(formData.subTotal) ? '' : formData.subTotal}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="total">Total + Sales Tax</label>
-            <input
-              type="number"
-              id="total"
-              name="total"
-              value={isNaN(formData.total) ? '' : formData.total}
-              readOnly
-            />
-          </div>
+        </section>
+
+        <div className="form-actions">
+          <Link to="/create-invoice" className="back-button">
+            Back to invoice types
+          </Link>
+          <button
+            type="submit"
+            className="invoice-button"
+            disabled={submitStatus === 'submitting'}
+          >
+            {submitStatus === 'submitting' ? 'Saving invoice…' : 'Create gaming invoice'}
+          </button>
         </div>
-        <button type="submit">Create Invoice</button>
       </form>
-      <Link to="/create-invoice">
-        <button className="back-button">Back to Create Invoice</button>
-      </Link>
-    </div>
+    </main>
   );
 };
 

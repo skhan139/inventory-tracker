@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../firebase'; // Import Firebase
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  runTransaction,
+} from 'firebase/firestore';
+import { db } from '../firebase';
 import ProductList from '../components/ProductList';
 import SearchBar from '../components/SearchBar';
 import ProductForm from '../components/ProductForm';
@@ -10,286 +17,492 @@ import AddExistingProductModal from '../components/AddExistingProductModal';
 import AddProductToStorageModal from '../components/AddProductToStorageModal';
 import './ProductsPage.css';
 
+const STORAGE_LOCATIONS = [
+  {
+    key: 'kmStorage',
+    name: 'K&M Inventory',
+    description: 'Primary K&M product storage',
+  },
+  {
+    key: 'keyserStorage',
+    name: 'Keyser Garage Inventory',
+    description: 'Products currently held at the Keyser garage',
+  },
+  {
+    key: 'gfcCumberlandStorage',
+    name: 'GFC Inventory',
+    description: 'GFC Cumberland product inventory',
+  },
+];
+
+const EMPTY_QUANTITIES = {
+  kmStorage: 0,
+  keyserStorage: 0,
+  gfcCumberlandStorage: 0,
+};
+
+const normalizeProduct = (id, product = {}) => ({
+  id,
+  ...product,
+  name: product.name?.trim() || 'Unnamed Product',
+  quantities: {
+    ...EMPTY_QUANTITIES,
+    ...(product.quantities || {}),
+  },
+});
+
+const toNonNegativeInteger = (value) => {
+  const quantity = Number.parseInt(value, 10);
+  return Number.isFinite(quantity) ? Math.max(0, quantity) : 0;
+};
+
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [kmStorageVisible, setKmStorageVisible] = useState(false);
-  const [keyserStorageVisible, setKeyserStorageVisible] = useState(false);
-  const [gfcStorageVisible, setGfcStorageVisible] = useState(false);
-  const [movePopupVisible, setMovePopupVisible] = useState(false);
-  const [currentProductId, setCurrentProductId] = useState(null);
-  const [currentLocation, setCurrentLocation] = useState('');
+  const [visibleStorage, setVisibleStorage] = useState({});
   const [isProductFormVisible, setIsProductFormVisible] = useState(false);
+  const [moveDetails, setMoveDetails] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isAddExistingProductModalVisible, setIsAddExistingProductModalVisible] = useState(false);
-  const [isAddProductToStorageModalVisible, setIsAddProductToStorageModalVisible] = useState(false);
+  const [isAddExistingProductModalVisible, setIsAddExistingProductModalVisible] =
+    useState(false);
   const [productToAdd, setProductToAdd] = useState(null);
+  const [isAddProductToStorageModalVisible, setIsAddProductToStorageModalVisible] =
+    useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [pageMessage, setPageMessage] = useState(null);
+
+  const showMessage = useCallback((type, text) => {
+    setPageMessage({ type, text });
+  }, []);
 
   useEffect(() => {
+    let isActive = true;
+
     const fetchProducts = async () => {
-      const querySnapshot = await getDocs(collection(db, 'products'));
-      const productsData = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          name: data.name || 'Unnamed Product', // Provide a default value for name
-          quantities: data.quantities || { kmStorage: 0, keyserStorage: 0, gfcCumberlandStorage: 0 } // Provide default values for quantities
-        };
-      });
-      setProducts(productsData);
+      try {
+        const querySnapshot = await getDocs(collection(db, 'products'));
+        const productData = querySnapshot.docs.map((productDocument) =>
+          normalizeProduct(productDocument.id, productDocument.data()),
+        );
+
+        if (isActive) {
+          setProducts(productData);
+        }
+      } catch (error) {
+        console.error('Unable to load products:', error);
+        if (isActive) {
+          showMessage('error', 'Inventory could not be loaded. Please refresh and try again.');
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
     };
 
     fetchProducts();
+
+    return () => {
+      isActive = false;
+    };
+  }, [showMessage]);
+
+  const filteredProducts = useMemo(() => {
+    const normalizedSearchTerm = searchTerm.trim().toLocaleLowerCase();
+
+    return products.filter((product) =>
+      product.name.toLocaleLowerCase().includes(normalizedSearchTerm),
+    );
+  }, [products, searchTerm]);
+
+  const storageSummaries = useMemo(() => {
+    return STORAGE_LOCATIONS.reduce((summaries, location) => {
+      const productsAtLocation = filteredProducts
+        .filter((product) => toNonNegativeInteger(product.quantities[location.key]) > 0)
+        .map((product) => ({
+          ...product,
+          quantity: toNonNegativeInteger(product.quantities[location.key]),
+        }));
+
+      summaries[location.key] = {
+        products: productsAtLocation,
+        productCount: productsAtLocation.length,
+        unitCount: productsAtLocation.reduce(
+          (total, product) => total + product.quantity,
+          0,
+        ),
+      };
+
+      return summaries;
+    }, {});
+  }, [filteredProducts]);
+
+  const updateProductQuantities = useCallback((productId, quantities) => {
+    setProducts((currentProducts) =>
+      currentProducts.map((product) =>
+        product.id === productId ? { ...product, quantities } : product,
+      ),
+    );
   }, []);
 
-  const handleIncrease = async (id, location) => {
-    const updatedProducts = products.map(product =>
-      product.id === id ? { ...product, quantities: { ...product.quantities, [location]: (product.quantities[location] || 0) + 1 } } : product
-    );
-    setProducts(updatedProducts);
+  const adjustQuantity = useCallback(
+    async (productId, location, change) => {
+      const productRef = doc(db, 'products', String(productId));
 
-    // Update Firebase
-    const productRef = doc(db, 'products', String(id)); // Ensure id is a string
-    const productToUpdate = updatedProducts.find(p => p.id === id);
-    await updateDoc(productRef, {
-      quantities: productToUpdate.quantities
-    });
-  };
+      try {
+        const quantities = await runTransaction(db, async (transaction) => {
+          const snapshot = await transaction.get(productRef);
 
-  const handleDecrease = async (id, location) => {
-    const updatedProducts = products.map(product =>
-      product.id === id ? { ...product, quantities: { ...product.quantities, [location]: (product.quantities[location] || 0) - 1 } } : product
-    );
-    setProducts(updatedProducts);
+          if (!snapshot.exists()) {
+            throw new Error('Product no longer exists.');
+          }
 
-    // Update Firebase
-    const productRef = doc(db, 'products', String(id)); // Ensure id is a string
-    const productToUpdate = updatedProducts.find(p => p.id === id);
-    await updateDoc(productRef, {
-      quantities: productToUpdate.quantities
-    });
-  };
+          const currentQuantities = {
+            ...EMPTY_QUANTITIES,
+            ...(snapshot.data().quantities || {}),
+          };
+          const nextQuantity = Math.max(
+            0,
+            toNonNegativeInteger(currentQuantities[location]) + change,
+          );
+          const nextQuantities = {
+            ...currentQuantities,
+            [location]: nextQuantity,
+          };
 
-  const handleAddProduct = async (newProduct, location) => {
-    if (!newProduct.name) {
-      alert('Product name is required');
-      return;
-    }
+          transaction.update(productRef, { quantities: nextQuantities });
+          return nextQuantities;
+        });
 
-    const docRef = await addDoc(collection(db, 'products'), {
-      ...newProduct,
-      quantities: {
-        kmStorage: location === 'kmStorage' ? newProduct.quantity : 0,
-        keyserStorage: location === 'keyserStorage' ? newProduct.quantity : 0,
-        gfcCumberlandStorage: location === 'gfcCumberlandStorage' ? newProduct.quantity : 0,
-      },
-    });
-    setProducts([...products, { id: docRef.id, ...newProduct }]);
-  };
+        updateProductQuantities(productId, quantities);
+      } catch (error) {
+        console.error('Unable to update quantity:', error);
+        showMessage('error', 'The quantity could not be updated. Please try again.');
+      }
+    },
+    [showMessage, updateProductQuantities],
+  );
 
-  const handleAddExistingProduct = (product) => {
+  const handleAddProduct = useCallback(
+    async (newProduct, location) => {
+      const productName = newProduct.name?.trim();
+      const quantity = toNonNegativeInteger(newProduct.quantity);
+
+      if (!productName) {
+        showMessage('error', 'A product name is required.');
+        return;
+      }
+
+      const productData = {
+        ...newProduct,
+        name: productName,
+        quantity,
+        quantities: {
+          ...EMPTY_QUANTITIES,
+          [location]: quantity,
+        },
+      };
+
+      try {
+        const documentReference = await addDoc(collection(db, 'products'), productData);
+        setProducts((currentProducts) => [
+          ...currentProducts,
+          normalizeProduct(documentReference.id, productData),
+        ]);
+        setIsProductFormVisible(false);
+        showMessage('success', `${productName} was added to inventory.`);
+      } catch (error) {
+        console.error('Unable to add product:', error);
+        showMessage('error', 'The product could not be added. Please try again.');
+      }
+    },
+    [showMessage],
+  );
+
+  const handleAddExistingProduct = useCallback((product) => {
     setProductToAdd(product);
     setIsAddExistingProductModalVisible(false);
     setIsAddProductToStorageModalVisible(true);
-  };
+  }, []);
 
-  const handleConfirmAddProductToStorage = async (product, quantity, storageLocation) => {
-    if (!product.name) {
-      alert('Product name is required');
-      return;
-    }
+  const handleConfirmAddProductToStorage = useCallback(
+    async (product, quantity, storageLocation) => {
+      const amountToAdd = toNonNegativeInteger(quantity);
 
-    const updatedProducts = products.map(p =>
-      p.id === product.id ? { ...p, quantities: { ...p.quantities, [storageLocation]: (p.quantities[storageLocation] || 0) + parseInt(quantity) } } : p
-    );
-    setProducts(updatedProducts);
-
-    // Update Firebase
-    const productRef = doc(db, 'products', String(product.id)); // Ensure product.id is a string
-    try {
-      const docSnapshot = await getDoc(productRef);
-      if (docSnapshot.exists()) {
-        await updateDoc(productRef, {
-          quantities: updatedProducts.find(p => p.id === product.id).quantities
-        });
-      } else {
-        // Create the document if it does not exist
-        await setDoc(productRef, {
-          quantities: updatedProducts.find(p => p.id === product.id).quantities
-        });
-        console.log(`Document created: ${productRef.path}`);
+      if (!product?.id || amountToAdd < 1) {
+        showMessage('error', 'Choose a product and enter a quantity greater than zero.');
+        return;
       }
-    } catch (error) {
-      console.error(`Error updating product: ${product.name}`, error);
-    }
 
-    setIsAddProductToStorageModalVisible(false);
-  };
+      const productRef = doc(db, 'products', String(product.id));
 
-  const handleDeleteProduct = async (id, location) => {
-    const updatedProducts = products.map(product => {
-      if (product.id === id) {
-        return {
-          ...product,
-          quantities: {
-            ...product.quantities,
-            [location]: 0,
-          },
-        };
-      }
-      return product;
-    });
-    setProducts(updatedProducts);
+      try {
+        const quantities = await runTransaction(db, async (transaction) => {
+          const snapshot = await transaction.get(productRef);
 
-    // Update Firebase
-    const productRef = doc(db, 'products', String(id)); // Ensure id is a string
-    try {
-      const docSnapshot = await getDoc(productRef);
-      if (docSnapshot.exists()) {
-        await updateDoc(productRef, {
-          quantities: updatedProducts.find(p => p.id === id).quantities
+          if (!snapshot.exists()) {
+            throw new Error('Product no longer exists.');
+          }
+
+          const currentQuantities = {
+            ...EMPTY_QUANTITIES,
+            ...(snapshot.data().quantities || {}),
+          };
+          const nextQuantities = {
+            ...currentQuantities,
+            [storageLocation]:
+              toNonNegativeInteger(currentQuantities[storageLocation]) + amountToAdd,
+          };
+
+          transaction.update(productRef, { quantities: nextQuantities });
+          return nextQuantities;
         });
-      } else {
-        // Create the document if it does not exist
-        await setDoc(productRef, {
-          quantities: updatedProducts.find(p => p.id === id).quantities
-        });
-        console.log(`Document created: ${productRef.path}`);
+
+        updateProductQuantities(product.id, quantities);
+        setIsAddProductToStorageModalVisible(false);
+        setProductToAdd(null);
+        showMessage('success', `${amountToAdd} unit(s) of ${product.name} were added.`);
+      } catch (error) {
+        console.error('Unable to add product to storage:', error);
+        showMessage('error', 'The inventory could not be updated. Please try again.');
       }
-    } catch (error) {
-      console.error(`Error updating product: ${id}`, error);
-    }
-  };
-
-  const handleDeleteProductFromList = async (id) => {
-    try {
-      await deleteDoc(doc(db, 'products', id));
-      setProducts(products.filter(product => product.id !== id));
-      alert('Product deleted successfully');
-    } catch (error) {
-      console.error('Error deleting product: ', error);
-      alert('Failed to delete product');
-    }
-  };
-
-  const handleMoveProduct = (id, location) => {
-    setCurrentProductId(id);
-    setCurrentLocation(location);
-    setMovePopupVisible(true);
-  };
-
-  const handleMove = async (id, newLocation) => {
-    const updatedProducts = products.map(product => {
-      if (product.id === id) {
-        const quantityToMove = product.quantities[currentLocation];
-        return {
-          ...product,
-          quantities: {
-            ...product.quantities,
-            [currentLocation]: 0,
-            [newLocation]: (product.quantities[newLocation] || 0) + quantityToMove,
-          },
-        };
-      }
-      return product;
-    });
-    setProducts(updatedProducts);
-
-    // Update Firebase
-    const productRef = doc(db, 'products', String(id)); // Ensure id is a string
-    const productToUpdate = updatedProducts.find(p => p.id === id);
-    await updateDoc(productRef, {
-      quantities: productToUpdate.quantities
-    });
-
-    setMovePopupVisible(false);
-  };
-
-  const handleProductClick = (product) => {
-    setSelectedProduct(product);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedProduct(null);
-  };
-
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    },
+    [showMessage, updateProductQuantities],
   );
 
+  const clearProductFromStorage = useCallback(
+    async (productId, location) => {
+      const productRef = doc(db, 'products', String(productId));
+
+      try {
+        const quantities = await runTransaction(db, async (transaction) => {
+          const snapshot = await transaction.get(productRef);
+
+          if (!snapshot.exists()) {
+            throw new Error('Product no longer exists.');
+          }
+
+          const nextQuantities = {
+            ...EMPTY_QUANTITIES,
+            ...(snapshot.data().quantities || {}),
+            [location]: 0,
+          };
+
+          transaction.update(productRef, { quantities: nextQuantities });
+          return nextQuantities;
+        });
+
+        updateProductQuantities(productId, quantities);
+      } catch (error) {
+        console.error('Unable to clear product quantity:', error);
+        showMessage('error', 'The product could not be removed from this location.');
+      }
+    },
+    [showMessage, updateProductQuantities],
+  );
+
+  const handleDeleteProductFromList = useCallback(
+    async (productId) => {
+      const product = products.find(({ id }) => id === productId);
+      const shouldDelete = window.confirm(
+        `Permanently delete ${product?.name || 'this product'} from every location?`,
+      );
+
+      if (!shouldDelete) {
+        return;
+      }
+
+      try {
+        await deleteDoc(doc(db, 'products', String(productId)));
+        setProducts((currentProducts) =>
+          currentProducts.filter(({ id }) => id !== productId),
+        );
+        showMessage('success', 'The product was permanently deleted.');
+      } catch (error) {
+        console.error('Unable to delete product:', error);
+        showMessage('error', 'The product could not be deleted. Please try again.');
+      }
+    },
+    [products, showMessage],
+  );
+
+  const handleMoveProduct = useCallback((productId, location) => {
+    setMoveDetails({ productId, location });
+  }, []);
+
+  const handleMove = useCallback(
+    async (productId, newLocation) => {
+      if (!moveDetails || newLocation === moveDetails.location) {
+        setMoveDetails(null);
+        return;
+      }
+
+      const productRef = doc(db, 'products', String(productId));
+
+      try {
+        const quantities = await runTransaction(db, async (transaction) => {
+          const snapshot = await transaction.get(productRef);
+
+          if (!snapshot.exists()) {
+            throw new Error('Product no longer exists.');
+          }
+
+          const currentQuantities = {
+            ...EMPTY_QUANTITIES,
+            ...(snapshot.data().quantities || {}),
+          };
+          const quantityToMove = toNonNegativeInteger(
+            currentQuantities[moveDetails.location],
+          );
+          const nextQuantities = {
+            ...currentQuantities,
+            [moveDetails.location]: 0,
+            [newLocation]:
+              toNonNegativeInteger(currentQuantities[newLocation]) + quantityToMove,
+          };
+
+          transaction.update(productRef, { quantities: nextQuantities });
+          return nextQuantities;
+        });
+
+        updateProductQuantities(productId, quantities);
+        setMoveDetails(null);
+        showMessage('success', 'Inventory was moved successfully.');
+      } catch (error) {
+        console.error('Unable to move inventory:', error);
+        showMessage('error', 'The inventory could not be moved. Please try again.');
+      }
+    },
+    [moveDetails, showMessage, updateProductQuantities],
+  );
+
+  const toggleStorage = useCallback((storageKey) => {
+    setVisibleStorage((currentVisibility) => ({
+      ...currentVisibility,
+      [storageKey]: !currentVisibility[storageKey],
+    }));
+  }, []);
+
   return (
-    <div className="products-page">
-      <button className="show-form-button" onClick={() => setIsProductFormVisible(!isProductFormVisible)}>
-        {isProductFormVisible ? 'Hide' : 'Add a New Product'}
-      </button>
-      {isProductFormVisible && <ProductForm addProduct={handleAddProduct} />}
-      <button className="add-existing-product-button" onClick={() => setIsAddExistingProductModalVisible(true)}>
-        Add Existing Product to Storage
-      </button>
-      <SearchBar value={searchTerm} onChange={setSearchTerm} />
+    <main className="products-page">
+      <header className="products-page-header">
+        <div>
+          <p className="eyebrow">Inventory workspace</p>
+          <h1>Products</h1>
+          <p className="page-introduction">
+            Track stock, move products, and manage quantities across every location.
+          </p>
+        </div>
 
-      <div className="inventory-section">
-        <h2>K&M Inventory</h2>
-        <button onClick={() => setKmStorageVisible(!kmStorageVisible)}>
-          {kmStorageVisible ? 'Hide' : 'Show'} K&M Inventory
-        </button>
-        {kmStorageVisible && (
-          <ProductList
-            products={filteredProducts.filter(product => product.quantities.kmStorage > 0).map(product => ({ ...product, quantity: product.quantities.kmStorage }))}
-            onIncrease={(id) => handleIncrease(id, 'kmStorage')}
-            onDecrease={(id) => handleDecrease(id, 'kmStorage')}
-            onDelete={(id) => handleDeleteProduct(id, 'kmStorage')}
-            onMove={(id) => handleMoveProduct(id, 'kmStorage')}
-            onProductClick={handleProductClick}
-          />
-        )}
-      </div>
+        <div className="page-actions">
+          <button
+            type="button"
+            className="secondary-action"
+            onClick={() => setIsAddExistingProductModalVisible(true)}
+          >
+            Add existing product
+          </button>
+          <button
+            type="button"
+            className="primary-action"
+            onClick={() => setIsProductFormVisible((isVisible) => !isVisible)}
+            aria-expanded={isProductFormVisible}
+          >
+            {isProductFormVisible ? 'Close product form' : 'Add new product'}
+          </button>
+        </div>
+      </header>
 
-      <div className="inventory-section">
-        <h2>Keyser Garage Inventory</h2>
-        <button onClick={() => setKeyserStorageVisible(!keyserStorageVisible)}>
-          {keyserStorageVisible ? 'Hide' : 'Show'} Keyser Garage Inventory
-        </button>
-        {keyserStorageVisible && (
-          <ProductList
-            products={filteredProducts.filter(product => product.quantities.keyserStorage > 0).map(product => ({ ...product, quantity: product.quantities.keyserStorage }))}
-            onIncrease={(id) => handleIncrease(id, 'keyserStorage')}
-            onDecrease={(id) => handleDecrease(id, 'keyserStorage')}
-            onDelete={(id) => handleDeleteProduct(id, 'keyserStorage')}
-            onMove={(id) => handleMoveProduct(id, 'keyserStorage')}
-            onProductClick={handleProductClick}
-          />
-        )}
-      </div>
+      {pageMessage && (
+        <div
+          className={`page-message page-message-${pageMessage.type}`}
+          role={pageMessage.type === 'error' ? 'alert' : 'status'}
+        >
+          <span>{pageMessage.text}</span>
+          <button type="button" onClick={() => setPageMessage(null)} aria-label="Dismiss message">
+            ×
+          </button>
+        </div>
+      )}
 
-      <div className="inventory-section">
-        <h2>GFC Inventory</h2>
-        <button onClick={() => setGfcStorageVisible(!gfcStorageVisible)}>
-          {gfcStorageVisible ? 'Hide' : 'Show'} GFC Inventory
-        </button>
-        {gfcStorageVisible && (
-          <ProductList
-            products={filteredProducts.filter(product => product.quantities.gfcCumberlandStorage > 0).map(product => ({ ...product, quantity: product.quantities.gfcCumberlandStorage }))}
-            onIncrease={(id) => handleIncrease(id, 'gfcCumberlandStorage')}
-            onDecrease={(id) => handleDecrease(id, 'gfcCumberlandStorage')}
-            onDelete={(id) => handleDeleteProduct(id, 'gfcCumberlandStorage')}
-            onMove={(id) => handleMoveProduct(id, 'gfcCumberlandStorage')}
-            onProductClick={handleProductClick}
-          />
-        )}
-      </div>
+      {isProductFormVisible && (
+        <section className="product-form-panel" aria-label="Add a new product">
+          <ProductForm addProduct={handleAddProduct} />
+        </section>
+      )}
 
-      {movePopupVisible && (
+      <section className="inventory-search" aria-label="Search inventory">
+        <SearchBar value={searchTerm} onChange={setSearchTerm} />
+      </section>
+
+      {isLoading ? (
+        <p className="inventory-status">Loading inventory…</p>
+      ) : (
+        <div className="inventory-grid">
+          {STORAGE_LOCATIONS.map((location) => {
+            const summary = storageSummaries[location.key];
+            const isVisible = Boolean(visibleStorage[location.key]);
+            const panelId = `${location.key}-inventory`;
+
+            return (
+              <section key={location.key} className="inventory-section">
+                <div className="inventory-section-header">
+                  <div>
+                    <p>{location.description}</p>
+                    <h2>{location.name}</h2>
+                  </div>
+                  <div className="inventory-metrics" aria-label={`${location.name} summary`}>
+                    <span><strong>{summary.productCount}</strong> products</span>
+                    <span><strong>{summary.unitCount}</strong> games</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="inventory-toggle"
+                  onClick={() => toggleStorage(location.key)}
+                  aria-expanded={isVisible}
+                  aria-controls={panelId}
+                >
+                  {isVisible ? 'Hide inventory' : 'View inventory'}
+                </button>
+
+                {isVisible && (
+                  <div id={panelId} className="inventory-panel">
+                    {summary.products.length ? (
+                      <ProductList
+                        products={summary.products}
+                        onIncrease={(id) => adjustQuantity(id, location.key, 1)}
+                        onDecrease={(id) => adjustQuantity(id, location.key, -1)}
+                        onDelete={(id) => clearProductFromStorage(id, location.key)}
+                        onMove={(id) => handleMoveProduct(id, location.key)}
+                        onProductClick={setSelectedProduct}
+                      />
+                    ) : (
+                      <p className="empty-location">
+                        {searchTerm
+                          ? 'No matching products at this location.'
+                          : 'No products are currently stored here.'}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
+      )}
+
+      {moveDetails && (
         <MovePopup
-          onClose={() => setMovePopupVisible(false)}
+          onClose={() => setMoveDetails(null)}
           onMove={handleMove}
-          productId={currentProductId}
-          currentLocation={currentLocation}
+          productId={moveDetails.productId}
+          currentLocation={moveDetails.location}
         />
       )}
 
-      <ProductModal product={selectedProduct} onClose={handleCloseModal} />
+      <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
 
       {isAddExistingProductModalVisible && (
         <AddExistingProductModal
@@ -303,11 +516,14 @@ const ProductsPage = () => {
       {isAddProductToStorageModalVisible && (
         <AddProductToStorageModal
           product={productToAdd}
-          onClose={() => setIsAddProductToStorageModalVisible(false)}
+          onClose={() => {
+            setIsAddProductToStorageModalVisible(false);
+            setProductToAdd(null);
+          }}
           onConfirm={handleConfirmAddProductToStorage}
         />
       )}
-    </div>
+    </main>
   );
 };
 

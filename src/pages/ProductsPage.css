@@ -1,150 +1,493 @@
-@keyframes fadeIn {
+/* ProductsPage.css */
+
+.products-page {
+  --surface: rgba(255, 255, 255, 0.97);
+  --surface-muted: #f7f8fa;
+  --text: #172033;
+  --muted: #667085;
+  --border: #e1e5ea;
+  --accent: #d8a928;
+  --accent-hover: #e6ba42;
+  --accent-soft: rgba(216, 169, 40, 0.14);
+  --danger: #b42318;
+  --danger-soft: #fff1ef;
+  --success: #087a55;
+  --success-soft: #eaf9f3;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  padding: clamp(38px, 6vw, 78px) clamp(14px, 5vw, 64px);
+  box-sizing: border-box;
+  color: white;
+  background:
+    radial-gradient(circle at 90% 0, rgba(216, 169, 40, 0.14), transparent 28rem),
+    linear-gradient(135deg, rgba(8, 13, 24, 0.96), rgba(14, 23, 39, 0.92)),
+    url('/src/assets/images/eggshellbg.jpg') center / cover fixed;
+  font-family: Inter, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.products-page *,
+.products-page *::before,
+.products-page *::after {
+  box-sizing: border-box;
+}
+
+.products-page .products-page-header,
+.products-page .page-message,
+.products-page .product-form-panel,
+.products-page .inventory-search,
+.products-page .inventory-status,
+.products-page .inventory-grid {
+  width: min(100%, 1120px);
+  margin-inline: auto;
+}
+
+.products-page .products-page-header {
+  display: flex;
+  margin-bottom: 30px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  animation: inventory-enter 400ms ease both;
+}
+
+.products-page .eyebrow {
+  margin: 0 0 11px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.products-page h1 {
+  margin: 0;
+  color: white;
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  font-weight: 760;
+  letter-spacing: -0.055em;
+  line-height: 1.05;
+}
+
+.products-page .page-introduction {
+  max-width: 620px;
+  margin: 15px 0 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.products-page .page-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+}
+
+.products-page .primary-action,
+.products-page .secondary-action,
+.products-page .inventory-toggle {
+  min-height: 45px;
+  padding: 0 17px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.products-page .primary-action {
+  border: 1px solid var(--accent);
+  color: #17130a;
+  background: var(--accent);
+  box-shadow: 0 10px 24px rgba(175, 130, 18, 0.18);
+}
+
+.products-page .primary-action::before {
+  margin-right: 7px;
+  content: "+";
+}
+
+.products-page .primary-action[aria-expanded="true"]::before {
+  content: "×";
+}
+
+.products-page .primary-action:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.products-page .secondary-action {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.products-page .secondary-action:hover {
+  color: white;
+  border-color: rgba(216, 169, 40, 0.45);
+  background: rgba(216, 169, 40, 0.1);
+}
+
+.products-page .page-message {
+  display: flex;
+  margin-bottom: 18px;
+  padding: 13px 15px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  border-radius: 11px;
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.products-page .page-message-success {
+  border: 1px solid rgba(8, 122, 85, 0.22);
+  color: #b6f3dc;
+  background: rgba(8, 122, 85, 0.18);
+}
+
+.products-page .page-message-error {
+  border: 1px solid rgba(255, 140, 130, 0.25);
+  color: #ffbbb4;
+  background: rgba(180, 35, 24, 0.18);
+}
+
+.products-page .page-message button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 7px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  font: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.products-page .product-form-panel {
+  margin-bottom: 20px;
+  padding: clamp(20px, 4vw, 34px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
+  animation: inventory-panel-enter 220ms ease both;
+}
+
+.products-page .product-form-panel input,
+.products-page .product-form-panel select,
+.products-page .product-form-panel textarea {
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+  color: var(--text);
+  background: var(--surface-muted);
+  font: inherit;
+}
+
+.products-page .product-form-panel input:focus,
+.products-page .product-form-panel select:focus,
+.products-page .product-form-panel textarea:focus {
+  border-color: var(--accent);
+  background: white;
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.products-page .inventory-search {
+  margin-bottom: 22px;
+}
+
+.products-page .inventory-search input,
+.products-page .inventory-search .search-bar {
+  display: block;
+  width: 100%;
+  min-height: 54px;
+  margin: 0;
+  padding: 0 18px 0 47px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 13px;
+  outline: none;
+  color: white;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%2398a2b3' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E") 17px center / 18px no-repeat,
+    rgba(255, 255, 255, 0.075);
+  font: inherit;
+  backdrop-filter: blur(12px);
+}
+
+.products-page .inventory-search input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.products-page .inventory-search input:focus {
+  border-color: var(--accent);
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 4px rgba(216, 169, 40, 0.13);
+}
+
+.products-page .inventory-status {
+  margin-top: 0;
+  padding: 30px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.04);
+  text-align: center;
+}
+
+.products-page .inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.products-page .inventory-section {
+  min-width: 0;
+  margin: 0;
+  padding: 24px;
+  align-self: start;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  color: white;
+  background:
+    radial-gradient(circle at 100% 0, rgba(216, 169, 40, 0.12), transparent 13rem),
+    rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(14px);
+  animation: inventory-enter 400ms ease both;
+}
+
+.products-page .inventory-section:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.products-page .inventory-section:nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.products-page .inventory-section-header {
+  display: flex;
+  min-height: 102px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.products-page .inventory-section-header p {
+  margin: 0 0 7px;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.69rem;
+  line-height: 1.45;
+}
+
+.products-page .inventory-section h2 {
+  margin: 0;
+  padding: 0;
+  color: white;
+  background: transparent;
+  font-size: 1.18rem;
+  font-weight: 740;
+  letter-spacing: -0.025em;
+  text-align: left;
+}
+
+.products-page .inventory-metrics {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 5px;
+  text-align: right;
+}
+
+.products-page .inventory-metrics span {
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 0.67rem;
+}
+
+.products-page .inventory-metrics strong {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.products-page .inventory-toggle {
+  width: 100%;
+  margin: 0;
+  border: 1px solid rgba(216, 169, 40, 0.36);
+  color: var(--accent);
+  background: rgba(216, 169, 40, 0.08);
+}
+
+.products-page .inventory-toggle::after {
+  margin-left: 8px;
+  content: "↓";
+}
+
+.products-page .inventory-toggle[aria-expanded="true"]::after {
+  content: "↑";
+}
+
+.products-page .inventory-toggle:hover {
+  color: #17130a;
+  background: var(--accent);
+}
+
+.products-page .inventory-panel {
+  margin-top: 15px;
+  animation: inventory-panel-enter 220ms ease both;
+}
+
+.products-page .empty-location {
+  margin: 0;
+  padding: 22px 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 11px;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.products-page .product-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.products-page .product-item {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  padding: 14px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.products-page .product-item span {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.products-page .product-item button {
+  min-width: 34px;
+  min-height: 34px;
+  margin: 0;
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: white;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.products-page .product-item button:hover {
+  border-color: var(--accent);
+  color: #5f490c;
+  background: var(--accent-soft);
+  transform: translateY(-1px);
+}
+
+.products-page button:focus-visible,
+.products-page input:focus-visible,
+.products-page select:focus-visible,
+.products-page textarea:focus-visible {
+  outline: 3px solid rgba(216, 169, 40, 0.42);
+  outline-offset: 3px;
+}
+
+@keyframes inventory-enter {
   from {
     opacity: 0;
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Header styles */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
+@keyframes inventory-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.logo {
-  height: 40px;
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
+@media (max-width: 980px) {
+  .products-page .inventory-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .products-page .inventory-section-header {
+    min-height: auto;
+    margin-bottom: 20px;
+  }
 }
 
-.back-to-homepage {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #000;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
+@media (max-width: 700px) {
+  .products-page .products-page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .products-page .page-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
-.back-to-homepage:hover {
-  background-color: #0056b3;
+@media (max-width: 480px) {
+  .products-page {
+    padding: 34px 13px 48px;
+  }
+
+  .products-page h1 {
+    font-size: 2.35rem;
+  }
+
+  .products-page .page-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .products-page .inventory-section {
+    padding: 19px 15px;
+  }
+
+  .products-page .inventory-section-header {
+    flex-direction: column;
+  }
+
+  .products-page .inventory-metrics {
+    grid-template-columns: auto auto;
+    text-align: left;
+  }
 }
 
-/* Inventory section styles */
-.inventory-section {
-  margin-bottom: 20px;
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
-}
-
-.inventory-section h2 {
-  margin-bottom: 10px;
-  color: white; /* Set text color to white */
-  background-color: black; /* Add background color */
-  padding: 10px; /* Add padding */
-  border-radius: 5px; /* Add border radius */
-  text-align: center; /* Center align text */
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
-}
-
-.inventory-section button {
-  margin-bottom: 10px;
-  padding: 10px 20px;
-  background-color: #000;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
-}
-
-.inventory-section button:hover {
-  background-color: #0056b3;
-}
-
-/* Product list styles */
-.product-list {
-  display: flex;
-  flex-direction: column;
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
-}
-
-.product-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  border: 1px solid #dee2e6;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  background-color: white; /* Set background color to white */
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
-}
-
-.product-item span {
-  flex: 1;
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
-}
-
-.product-item button {
-  margin-left: 10px;
-  padding: 5px 10px;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
-}
-
-.product-item button:hover {
-  background-color: #c82333;
-}
-
-/* Page styles */
-.products-page {
-  background-image: url(/src/assets/images/eggshellbg.jpg);
-  padding: 20px;
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
-}
-
-/* Show form button styles */
-.show-form-button {
-  padding: 10px 20px; /* Decrease padding for a smaller button */
-  font-size: 14px; /* Decrease font size */
-  background-color: #000; /* Button background color set to black */
-  color: white; /* Button text color */
-  border: none; /* Remove border */
-  border-radius: 5px; /* Add border radius */
-  cursor: pointer; /* Change cursor to pointer */
-  margin: 20px auto; /* Add margin at the top and center horizontally */
-  display: block; /* Make the button a block element to center it */
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
-}
-
-.show-form-button:hover {
-  background-color: #0056b3; /* Change background color on hover */
-}
-
-/* Add existing product button styles */
-.add-existing-product-button {
-  padding: 10px 20px;
-  background-color: #000; /* Button background color set to black */
-  color: white; /* Button text color */
-  border: none; /* Remove border */
-  border-radius: 5px; /* Add border radius */
-  cursor: pointer; /* Change cursor to pointer */
-  margin: 20px auto; /* Add margin at the top and center horizontally */
-  display: block; /* Make the button a block element to center it */
-  animation: fadeIn 1s ease-in-out; /* Add fade-in animation */
-}
-
-.add-existing-product-button:hover {
-  background-color: #0056b3; /* Change background color on hover */
+@media (prefers-reduced-motion: reduce) {
+  .products-page *,
+  .products-page *::before,
+  .products-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

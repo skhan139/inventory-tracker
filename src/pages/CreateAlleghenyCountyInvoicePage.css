@@ -1,86 +1,423 @@
+/* CreateAlleghenyCountyInvoicePage.css */
+
 .create-allegheny-county-invoice-page {
-  padding: 20px;
-  text-align: center;
-  background-image: url(/src/assets/images/eggshellbg.jpg);
+  --surface: rgba(255, 255, 255, 0.97);
+  --surface-muted: #f7f8fa;
+  --text: #172033;
+  --muted: #667085;
+  --border: #e1e5ea;
+  --accent: #d8a928;
+  --accent-hover: #e6ba42;
+  --accent-soft: rgba(216, 169, 40, 0.14);
+  --danger: #b42318;
+  --danger-soft: #fff1ef;
+  --success: #087a55;
+  --success-soft: #eaf9f3;
+
   min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  padding: clamp(36px, 6vw, 78px) clamp(14px, 5vw, 64px);
+  box-sizing: border-box;
+  color: white;
+  background:
+    radial-gradient(circle at 90% 0, rgba(216, 169, 40, 0.14), transparent 28rem),
+    linear-gradient(135deg, rgba(8, 13, 24, 0.96), rgba(14, 23, 39, 0.92)),
+    url('/src/assets/images/eggshellbg.jpg') center / cover fixed;
+  font-family: Inter, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.create-allegheny-county-invoice-page *,
+.create-allegheny-county-invoice-page *::before,
+.create-allegheny-county-invoice-page *::after {
   box-sizing: border-box;
 }
 
-.invoice-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.create-allegheny-county-invoice-page .page-header,
+.create-allegheny-county-invoice-page .invoice-form {
+  width: min(100%, 1080px);
+  margin-inline: auto;
 }
 
-.form-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 20px;
+.create-allegheny-county-invoice-page .page-header {
+  margin-bottom: 34px;
 }
 
-.form-group {
-  margin: 10px;
+.create-allegheny-county-invoice-page .eyebrow {
+  margin: 0 0 11px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
-.form-group label {
+.create-allegheny-county-invoice-page h1 {
+  margin: 0;
+  color: white;
+  font-size: clamp(2.3rem, 6vw, 4.4rem);
+  font-weight: 760;
+  letter-spacing: -0.055em;
+  line-height: 1.05;
+}
+
+.create-allegheny-county-invoice-page .page-introduction {
+  max-width: 680px;
+  margin: 17px 0 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.96rem;
+  line-height: 1.65;
+}
+
+.create-allegheny-county-invoice-page .invoice-form {
+  display: grid;
+  gap: 20px;
+}
+
+.create-allegheny-county-invoice-page .form-section {
+  padding: clamp(22px, 4vw, 38px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 22px;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
+}
+
+.create-allegheny-county-invoice-page .section-heading {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+  align-items: start;
+}
+
+.create-allegheny-county-invoice-page .section-heading > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 13px;
+  color: #17130a;
+  background: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.create-allegheny-county-invoice-page .section-heading h2 {
+  margin: 0 0 5px;
+  color: var(--text);
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
+}
+
+.create-allegheny-county-invoice-page .section-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.create-allegheny-county-invoice-page .section-heading-with-action {
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+}
+
+.create-allegheny-county-invoice-page .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.create-allegheny-county-invoice-page .form-group {
+  min-width: 0;
+  margin: 0;
+}
+
+.create-allegheny-county-invoice-page .form-group-wide {
+  grid-column: 1 / -1;
+}
+
+.create-allegheny-county-invoice-page .form-group label {
   display: block;
-  margin-bottom: 5px;
+  margin: 0 0 7px;
+  color: #344054;
+  font-size: 0.78rem;
+  font-weight: 720;
 }
 
-.form-group input {
-  width: 150px;
-  padding: 8px;
-  box-sizing: border-box;
+.create-allegheny-county-invoice-page input,
+.create-allegheny-county-invoice-page select,
+.create-allegheny-county-invoice-page textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+  color: var(--text);
+  background: var(--surface-muted);
+  font: inherit;
+  font-size: 0.9rem;
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
 }
 
-.product-group {
-  display: flex;
-  flex-wrap: wrap;
+.create-allegheny-county-invoice-page textarea {
+  min-height: 105px;
+  padding-block: 12px;
+  resize: vertical;
+}
+
+.create-allegheny-county-invoice-page input:focus,
+.create-allegheny-county-invoice-page select:focus,
+.create-allegheny-county-invoice-page textarea:focus {
+  border-color: var(--accent);
+  background: white;
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.create-allegheny-county-invoice-page .packet-list {
+  display: grid;
+  gap: 16px;
+}
+
+.create-allegheny-county-invoice-page .product-group {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--surface-muted);
+}
+
+.create-allegheny-county-invoice-page .product-group legend {
+  padding: 0 8px;
+  color: #927018;
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.create-allegheny-county-invoice-page .packet-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.create-allegheny-county-invoice-page .currency-input {
+  position: relative;
+}
+
+.create-allegheny-county-invoice-page .currency-input > span {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 13px;
+  color: var(--muted);
+  transform: translateY(-50%);
+}
+
+.create-allegheny-county-invoice-page .currency-input input {
+  padding-left: 28px;
+}
+
+.create-allegheny-county-invoice-page .packet-summary {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(216, 169, 40, 0.22);
+  border-radius: 10px;
+  color: #5f490c;
+  background: var(--accent-soft);
+  font-size: 0.82rem;
+}
+
+.create-allegheny-county-invoice-page .add-product,
+.create-allegheny-county-invoice-page .delete-product,
+.create-allegheny-county-invoice-page .invoice-button,
+.create-allegheny-county-invoice-page .back-button {
+  display: inline-flex;
+  min-height: 44px;
+  padding: 0 16px;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #dee2e6;
-  border-radius: 5px;
-}
-
-.totals-row {
-  border-top: 2px solid #dee2e6;
-  padding-top: 20px;
-}
-
-.delete-product {
-  background-color: #dc3545;
-  margin-top: 10px;
-  padding: 10px 20px;
-  color: white;
-  border: none;
-  border-radius: 5px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.81rem;
+  font-weight: 750;
+  text-decoration: none;
   cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
 
-.delete-product:hover {
-  background-color: #c82333;
+.create-allegheny-county-invoice-page .add-product,
+.create-allegheny-county-invoice-page .invoice-button {
+  border: 1px solid var(--accent);
+  color: #17130a;
+  background: var(--accent);
 }
 
-.invoice-button, .back-button {
-  margin-top: 50px;
-  padding: 10px 20px;
-  background-color: #007bff;
+.create-allegheny-county-invoice-page .add-product:hover,
+.create-allegheny-county-invoice-page .invoice-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  box-shadow: 0 10px 24px rgba(175, 130, 18, 0.2);
+  transform: translateY(-1px);
+}
+
+.create-allegheny-county-invoice-page .delete-product {
+  min-height: 38px;
+  margin-top: 14px;
+  border: 1px solid rgba(180, 35, 24, 0.16);
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.create-allegheny-county-invoice-page .delete-product:hover {
   color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  border-color: var(--danger);
+  background: var(--danger);
 }
 
-.invoice-button:hover, .back-button:hover {
-  background-color: #0056b3;
+.create-allegheny-county-invoice-page .totals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
 }
 
-.success-message {
-  background-color: #28a745;
+.create-allegheny-county-invoice-page .totals-grid > div {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.create-allegheny-county-invoice-page .totals-grid dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.create-allegheny-county-invoice-page .totals-grid dd {
+  margin: 7px 0 0;
+  color: var(--text);
+  font-size: 1.12rem;
+  font-weight: 800;
+}
+
+.create-allegheny-county-invoice-page .totals-grid .grand-total {
+  border-color: rgba(216, 169, 40, 0.35);
+  background: var(--accent-soft);
+}
+
+.create-allegheny-county-invoice-page .notes-group {
+  margin-top: 22px;
+}
+
+.create-allegheny-county-invoice-page .form-actions {
+  display: flex;
+  padding-top: 4px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.create-allegheny-county-invoice-page .back-button {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.create-allegheny-county-invoice-page .back-button:hover {
   color: white;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 20px;
+  border-color: rgba(216, 169, 40, 0.45);
+  background: rgba(216, 169, 40, 0.1);
+}
+
+.create-allegheny-county-invoice-page .invoice-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.create-allegheny-county-invoice-page .success-message,
+.create-allegheny-county-invoice-page .error-message {
+  padding: 14px 16px;
+  border-radius: 11px;
+  font-size: 0.86rem;
+  font-weight: 680;
+}
+
+.create-allegheny-county-invoice-page .success-message {
+  border: 1px solid rgba(8, 122, 85, 0.2);
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.create-allegheny-county-invoice-page .error-message {
+  border: 1px solid rgba(180, 35, 24, 0.2);
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.create-allegheny-county-invoice-page button:focus-visible,
+.create-allegheny-county-invoice-page a:focus-visible,
+.create-allegheny-county-invoice-page input:focus-visible,
+.create-allegheny-county-invoice-page select:focus-visible,
+.create-allegheny-county-invoice-page textarea:focus-visible {
+  outline: 3px solid rgba(216, 169, 40, 0.42);
+  outline-offset: 3px;
+}
+
+@media (max-width: 840px) {
+  .create-allegheny-county-invoice-page .packet-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .create-allegheny-county-invoice-page .totals-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .create-allegheny-county-invoice-page {
+    padding: 34px 13px 48px;
+  }
+
+  .create-allegheny-county-invoice-page h1 {
+    font-size: 2.35rem;
+  }
+
+  .create-allegheny-county-invoice-page .form-grid,
+  .create-allegheny-county-invoice-page .packet-grid,
+  .create-allegheny-county-invoice-page .totals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .create-allegheny-county-invoice-page .section-heading-with-action {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .create-allegheny-county-invoice-page .section-heading-with-action .add-product {
+    grid-column: 1 / -1;
+  }
+
+  .create-allegheny-county-invoice-page .product-group {
+    padding: 19px 14px;
+  }
+
+  .create-allegheny-county-invoice-page .form-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .create-allegheny-county-invoice-page .back-button,
+  .create-allegheny-county-invoice-page .invoice-button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .create-allegheny-county-invoice-page *,
+  .create-allegheny-county-invoice-page *::before,
+  .create-allegheny-county-invoice-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
