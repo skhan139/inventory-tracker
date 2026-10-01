@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useInvoices } from '../context/InvoicesContext';
-import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  updateDoc
+} from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import './CreateInvoicePage.css';
 
