@@ -35,7 +35,6 @@ const EditInvoicePage = () => {
   const [availableProducts, setAvailableProducts] = useState([]);
   const [discountType, setDiscountType] = useState('percent'); // 'percent' or 'dollar'
   const [discountValue, setDiscountValue] = useState(0);
-  const { updateInvoice } = useInvoices();
   const navigate = useNavigate();
 
   useEffect(() => {
